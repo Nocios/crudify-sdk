@@ -1,48 +1,30 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import CrudifyInstance from "../../src/crudify";
+import { resetCrudifyState, mockInitSuccess, createMockJWT, mockCrudSuccess } from "../helpers/testUtils";
 
 describe("CRUD Operations", () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(async () => {
+    // Reset complete state
+    resetCrudifyState();
+
     // Save original fetch
     originalFetch = globalThis.fetch;
 
-    // Reset instance state
-    (CrudifyInstance as any).token = "";
-    (CrudifyInstance as any).refreshToken = "";
-    (CrudifyInstance as any).tokenExpiresAt = 0;
-    (CrudifyInstance as any).refreshExpiresAt = 0;
-
     // Initialize
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      json: async () => ({
-        data: {
-          response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
-          },
-        },
-      }),
-    });
-
+    globalThis.fetch = vi.fn().mockResolvedValue(mockInitSuccess());
     await CrudifyInstance.init("test-api-key");
 
-    // Set valid token
-    const futureTime = Math.floor(Date.now() / 1000) + 3600;
-    const payload = {
-      sub: "user123",
-      exp: futureTime,
-      type: "access",
-    };
-    const validToken = `header.${btoa(JSON.stringify(payload))}.signature`;
-
+    // Set valid token using helper
+    const validToken = createMockJWT({ username: "testuser" }, 3600);
     (CrudifyInstance as any).token = validToken;
     (CrudifyInstance as any).tokenExpiresAt = Date.now() + 3600000;
   });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
+    resetCrudifyState();
   });
 
   describe("createItem", () => {

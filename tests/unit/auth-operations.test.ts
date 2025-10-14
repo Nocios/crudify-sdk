@@ -1,17 +1,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import CrudifyInstance from "../../src/crudify";
+import { resetCrudifyState, mockInitSuccess, mockLoginSuccess, mockError, mockRefreshSuccess } from "../helpers/testUtils";
 
 describe("Authentication Operations", () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
-    // Reset instance state
-    (CrudifyInstance as any).token = "";
-    (CrudifyInstance as any).refreshToken = "";
-    (CrudifyInstance as any).tokenExpiresAt = 0;
-    (CrudifyInstance as any).refreshExpiresAt = 0;
-    (CrudifyInstance as any).endpoint = "";
-    (CrudifyInstance as any).apiKey = "";
+    // Reset complete Crudify state (including isInitialized flag)
+    resetCrudifyState();
 
     // Save original fetch
     originalFetch = globalThis.fetch;
@@ -20,6 +16,9 @@ describe("Authentication Operations", () => {
   afterEach(() => {
     // Restore original fetch
     globalThis.fetch = originalFetch;
+
+    // Clean up state
+    resetCrudifyState();
   });
 
   describe("init", () => {

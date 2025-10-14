@@ -1,26 +1,21 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import CrudifyInstance from "../../src/crudify";
+import { resetCrudifyState, createMockJWT } from "../helpers/testUtils";
 
 describe("E2E: Complete User Flow", () => {
   let originalFetch: typeof globalThis.fetch;
   let fetchMock: any;
 
   beforeEach(() => {
+    resetCrudifyState();
     originalFetch = globalThis.fetch;
     fetchMock = vi.fn();
     globalThis.fetch = fetchMock;
-
-    // Reset instance state
-    (CrudifyInstance as any).token = "";
-    (CrudifyInstance as any).refreshToken = "";
-    (CrudifyInstance as any).tokenExpiresAt = 0;
-    (CrudifyInstance as any).refreshExpiresAt = 0;
-    (CrudifyInstance as any).endpoint = "";
-    (CrudifyInstance as any).apiKey = "";
   });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
+    resetCrudifyState();
   });
 
   it("should complete full application flow: init, login, CRUD operations, logout", async () => {
