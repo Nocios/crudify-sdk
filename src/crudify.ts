@@ -970,8 +970,8 @@ class Crudify implements CrudifyPublicAPI {
     return this.performCrudOperationPublic(queryGetStructure, {}, options);
   };
 
-  public getTranslation = async (sections?: string[], options?: CrudifyRequestOptions): Promise<CrudifyResponse> => {
-    const data = sections ? { sections } : {};
+  public getTranslation = async (featureKeys?: string[], options?: CrudifyRequestOptions): Promise<CrudifyResponse> => {
+    const data = featureKeys ? { featureKeys } : {};
     return this.performCrudOperationPublic(queryGetTranslation, { data: JSON.stringify(data) }, options);
   };
 
