@@ -491,7 +491,7 @@ describe("CRUD Operations", () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.data).toBe(mockUrl);
+      expect(result.data.url).toBe(mockUrl);
     });
 
     it("should throw error when not authenticated", async () => {
