@@ -124,8 +124,8 @@ mutation MyMutation($data: AWSJSON) {
 }
 `;
 
-const queryGenerateSignedUrl = `
-query MyQuery($data: AWSJSON) {
+const mutationGenerateSignedUrl = `
+mutation MyMutation($data: AWSJSON) {
   response:generateSignedUrl(data: $data) {
     data
     status
@@ -147,6 +147,26 @@ query MyQuery($data: AWSJSON) {
 const queryGetNextSequence = `
 query MyQuery($data: AWSJSON) {
   response:getNextSequence(data: $data) {
+    data
+    status
+    fieldsWarning
+  }
+}
+`;
+
+const mutationDisableFile = `
+mutation MyMutation($data: AWSJSON) {
+  response:disableFile(data: $data) {
+    data
+    status
+    fieldsWarning
+  }
+}
+`;
+
+const queryGetFileUrl = `
+query MyQuery($data: AWSJSON) {
+  response:getFileUrl(data: $data) {
     data
     status
     fieldsWarning
@@ -983,23 +1003,61 @@ class Crudify implements CrudifyPublicAPI {
     return this.performCrudOperationPublic(mutationCreateItem, { moduleKey, data: JSON.stringify(data) }, options);
   };
 
+  /**
+   * Generate a pre-signed URL for uploading a file to S3
+   * @param data.fileName - Name of the file to upload
+   * @param data.contentType - MIME type of the file
+   * @param data.visibility - "public" | "private" (default: "private")
+   * @param options - Optional request configuration (AbortSignal)
+   * @returns Promise<CrudifyResponse> with data: { uploadUrl, s3Key, visibility, publicUrl }
+   */
   public generateSignedUrl = async (
-    data: { fileName: string; contentType: string },
+    data: { fileName: string; contentType: string; visibility?: "public" | "private" },
     options?: CrudifyRequestOptions
   ): Promise<CrudifyResponse> => {
     if (!this.endpoint || !this.token) throw new Error("Crudify: Not initialized. Call init() first.");
 
+    // Ensure visibility has a default value
+    const requestData = {
+      fileName: data.fileName,
+      contentType: data.contentType,
+      visibility: data.visibility || "private",
+    };
+
     const rawResponse = await this.executeQuery(
-      queryGenerateSignedUrl,
-      { data: JSON.stringify(data) },
+      mutationGenerateSignedUrl,
+      { data: JSON.stringify(requestData) },
       { Authorization: `Bearer ${this.token}` },
       options?.signal
     );
     const internalResponse = this.formatResponseInternal(rawResponse);
 
-    if (internalResponse.success && internalResponse.data?.url) return { success: true, data: internalResponse.data.url };
-
+    // Return the full response data including uploadUrl, s3Key, visibility, publicUrl
     return this.adaptToPublicResponse(internalResponse);
+  };
+
+  /**
+   * Disable (soft-delete) a file in S3
+   * This allows for recovery if needed and prevents accidental data loss
+   * @param data - Object containing filePath (relative path without subscriberKey)
+   * @param options - Optional request configuration (AbortSignal)
+   * @returns Promise<CrudifyResponse> with data: { filePath, disabled: true }
+   */
+  public disableFile = async (data: { filePath: string }, options?: CrudifyRequestOptions): Promise<CrudifyResponse> => {
+    return this.performCrudOperation(mutationDisableFile, { data: JSON.stringify(data) }, options);
+  };
+
+  /**
+   * Get URL for accessing a file
+   * - Public files: Returns direct CloudFront URL (cached globally)
+   * - Private files: Returns signed URL with expiration
+   * @param data.filePath - Path of the file (e.g., "public/avatar.jpg" or "private/doc.pdf")
+   * @param data.expiresIn - Expiration time in seconds for private files (default: 3600)
+   * @param options - Optional request configuration (AbortSignal)
+   * @returns Promise<CrudifyResponse> with data: { url, isPublic, expiresAt }
+   */
+  public getFileUrl = async (data: { filePath: string; expiresIn?: number }, options?: CrudifyRequestOptions): Promise<CrudifyResponse> => {
+    return this.performCrudOperation(queryGetFileUrl, { data: JSON.stringify(data) }, options);
   };
 
   public readItem = async (

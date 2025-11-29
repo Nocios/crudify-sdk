@@ -264,10 +264,10 @@ describe("E2E: Complete User Flow", () => {
     });
 
     expect(signedUrlResult.success).toBe(true);
-    expect(signedUrlResult.data).toBe(mockSignedUrl);
+    expect(signedUrlResult.data.url).toBe(mockSignedUrl);
 
     // Simulate uploading to signed URL (external fetch, not mocked here)
-    // In real scenario: await fetch(signedUrlResult.data, { method: 'PUT', body: fileData })
+    // In real scenario: await fetch(signedUrlResult.data.url, { method: 'PUT', body: fileData })
 
     // Create user with uploaded file reference
     fetchMock.mockResolvedValueOnce({
