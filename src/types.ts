@@ -155,7 +155,7 @@ export interface CrudifyPublicAPI {
   getTranslation: (sections?: string[], options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   createItem: (moduleKey: string, data: object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   createItemPublic: (moduleKey: string, data: object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
-  readItem: (moduleKey: string, filter: { _id: string } | object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
+  readItem: (moduleKey: string, filter: ReadItemFilter | object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   readItems: (moduleKey: string, filter: object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   updateItem: (moduleKey: string, data: object, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   deleteItem: (moduleKey: string, id: string, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
@@ -174,3 +174,37 @@ export interface CrudifyPublicAPI {
 export type CrudifyRequestOptions = {
   signal?: AbortSignal;
 };
+
+/**
+ * Configuration for populating referenced documents in read operations.
+ * Supports both simple paths and nested paths within arrays.
+ *
+ * @example Simple path
+ * ```typescript
+ * { path: "customer", moduleKey: "customers", select: ["name", "email"] }
+ * ```
+ *
+ * @example Nested path (for arrays)
+ * ```typescript
+ * { path: "saleItems.owner", moduleKey: "users", select: ["name", "lastName"] }
+ * ```
+ */
+export interface PopulateOption {
+  /** Field path to populate. Supports nested paths like "arrayField.nestedRef" */
+  path: string;
+  /** Module key of the referenced collection */
+  moduleKey: string;
+  /** Fields to select from the populated document. If omitted, all allowed fields are returned */
+  select?: string[] | string;
+}
+
+/**
+ * Filter options for readItem operation.
+ * Extends the basic _id filter with optional populate configuration.
+ */
+export interface ReadItemFilter {
+  /** Document ID to retrieve */
+  _id: string;
+  /** Optional populate configuration for loading referenced documents */
+  populate?: PopulateOption[];
+}

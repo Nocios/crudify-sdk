@@ -11,6 +11,8 @@ import {
   NociosError,
   CrudifyTokenData,
   CrudifyTokenConfig,
+  PopulateOption,
+  ReadItemFilter,
 } from "./types";
 
 export {
@@ -24,6 +26,8 @@ export {
   type CrudifyResponseInterceptor,
   type CrudifyTokenData,
   type CrudifyTokenConfig,
+  type PopulateOption,
+  type ReadItemFilter,
   NociosError,
 };
 
