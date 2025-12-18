@@ -3,10 +3,16 @@
  *
  * Environment-based logging:
  * - dev/stg: All logs (error, warn, info, debug)
- * - prod: Only errors
+ * - prod: Only errors (default)
+ *
+ * IMPORTANT: This logger does NOT read environment variables.
+ * The parent application must explicitly set the environment via setEnvironment().
  *
  * Usage:
  *   import { logger } from './logger';
+ *
+ *   // Set environment from parent app
+ *   logger.setEnvironment('dev'); // or 'stg', 'prod'
  *
  *   logger.error('Something failed', { userId: '123' });
  *   logger.warn('Deprecated feature used');
@@ -19,23 +25,6 @@ export type LogLevel = "error" | "warn" | "info" | "debug";
 export interface LogContext {
   [key: string]: any;
 }
-
-// ============================================
-// Environment Detection
-// ============================================
-const getEnvironment = (): string => {
-  // Node.js environment
-  if (typeof process !== "undefined" && process.env) {
-    return process.env.ENVIRONMENT || process.env.NODE_ENV || "prod";
-  }
-  // Browser environment (Vite)
-  if (typeof window !== "undefined") {
-    const w = window as any;
-    if (w.__VITE_ENV__) return w.__VITE_ENV__;
-    if (w.__CRUDIFY_ENV__) return w.__CRUDIFY_ENV__;
-  }
-  return "prod";
-};
 
 // ============================================
 // Sensitive Data Patterns (for sanitization)
@@ -54,7 +43,8 @@ const SENSITIVE_PATTERNS = [
 // ============================================
 // Logger Class
 // ============================================
-let ENVIRONMENT = getEnvironment();
+// Default to "prod" - parent app must call setEnvironment() to enable verbose logging
+let ENVIRONMENT = "prod";
 const PREFIX = "CrudifyCore";
 
 class Logger {
