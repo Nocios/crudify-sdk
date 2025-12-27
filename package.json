@@ -1,6 +1,6 @@
 {
   "name": "@nocios/crudify-browser",
-  "version": "4.1.28",
+  "version": "5.0.0",
   "engines": {
     "node": ">=24.12.0"
   },
