@@ -1,4 +1,4 @@
-# @nocios/crudify-browser - Complete Documentation
+# @nocios/crudify-sdk - Complete Documentation
 
 **Comprehensive API SDK reference for browser environments**
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-@nocios/crudify-browser is a lightweight, zero-dependency JavaScript SDK designed for browser environments. It provides complete access to the Crudify GraphQL API with modern authentication patterns, comprehensive CRUD operations, and advanced features like transactions and file management.
+@nocios/crudify-sdk is a lightweight, zero-dependency JavaScript SDK designed for browser environments. It provides complete access to the Crudify GraphQL API with modern authentication patterns, comprehensive CRUD operations, and advanced features like transactions and file management.
 
 ### Core Principles
 
@@ -47,7 +47,7 @@
 ### SDK Structure
 
 ```
-@nocios/crudify-browser/
+@nocios/crudify-sdk/
 ├── src/
 │   ├── crudify.ts           # Main SDK class
 │   ├── types.ts             # TypeScript type definitions
@@ -87,7 +87,7 @@
 ### Basic Installation
 
 ```bash
-npm install @nocios/crudify-browser
+npm install @nocios/crudify-sdk
 ```
 
 No additional dependencies required - the SDK is completely standalone.
@@ -96,7 +96,7 @@ No additional dependencies required - the SDK is completely standalone.
 
 ```html
 <!-- IIFE build for direct browser use -->
-<script src="https://unpkg.com/@nocios/crudify-browser@latest/dist/index.global.js"></script>
+<script src="https://unpkg.com/@nocios/crudify-sdk@latest/dist/index.global.js"></script>
 <script>
   const crudify = new window.Crudify();
 </script>
@@ -106,26 +106,26 @@ No additional dependencies required - the SDK is completely standalone.
 
 ```javascript
 // ES module import
-import { Crudify } from "@nocios/crudify-browser";
+import { Crudify } from "@nocios/crudify-sdk";
 
 // Or default export
-import Crudify from "@nocios/crudify-browser";
+import Crudify from "@nocios/crudify-sdk";
 ```
 
 ### CommonJS
 
 ```javascript
 // CommonJS require
-const { Crudify } = require("@nocios/crudify-browser");
+const { Crudify } = require("@nocios/crudify-sdk");
 
 // Or default export
-const Crudify = require("@nocios/crudify-browser").default;
+const Crudify = require("@nocios/crudify-sdk").default;
 ```
 
 ### Basic Setup
 
 ```javascript
-import { Crudify } from "@nocios/crudify-browser";
+import { Crudify } from "@nocios/crudify-sdk";
 
 // Create instance
 const crudify = new Crudify({
@@ -651,7 +651,7 @@ const crudify = new Crudify({
 ### Complete Type Safety
 
 ```typescript
-import { Crudify, CrudifyResponse, CrudifyError } from "@nocios/crudify-browser";
+import { Crudify, CrudifyResponse, CrudifyError } from "@nocios/crudify-sdk";
 
 // Define your data interfaces
 interface User {
@@ -698,7 +698,7 @@ try {
 
 ```typescript
 // Extend SDK types for your specific use case
-declare module "@nocios/crudify-browser" {
+declare module "@nocios/crudify-sdk" {
   interface CrudifyConfig {
     customOption?: string;
   }
@@ -813,7 +813,7 @@ const results = await crudify.batch(batchOperations);
 1. **Update Dependencies:**
 
    ```bash
-   npm install @nocios/crudify-browser@latest
+   npm install @nocios/crudify-sdk@latest
    ```
 
 2. **Update Constructor Calls:**

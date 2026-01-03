@@ -1,5 +1,5 @@
 /**
- * Test utilities for npm-crudify-core
+ * Test utilities for crudify-sdk
  * Provides helper functions for testing Crudify SDK
  */
 
@@ -46,10 +46,7 @@ export function resetCrudifyState(): void {
  * @param expiresIn - Expiration time in seconds from now (default: 3600 = 1 hour)
  * @returns Base64-encoded JWT token
  */
-export function createMockJWT(
-  payload: Record<string, any>,
-  expiresIn: number = 3600
-): string {
+export function createMockJWT(payload: Record<string, any>, expiresIn: number = 3600): string {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
 
@@ -74,20 +71,14 @@ export function createMockJWT(
  * @param expiredBySeconds - How many seconds ago the token expired (default: 60)
  * @returns Expired Base64-encoded JWT token
  */
-export function createExpiredJWT(
-  payload: Record<string, any> = {},
-  expiredBySeconds: number = 60
-): string {
+export function createExpiredJWT(payload: Record<string, any> = {}, expiredBySeconds: number = 60): string {
   return createMockJWT(payload, -expiredBySeconds);
 }
 
 /**
  * Mock fetch response for successful init
  */
-export function mockInitSuccess(
-  endpoint: string = "https://api.test.com/graphql",
-  apiKey: string = "test-endpoint-key"
-) {
+export function mockInitSuccess(endpoint: string = "https://api.test.com/graphql", apiKey: string = "test-endpoint-key") {
   return {
     json: async () => ({
       data: {
@@ -116,12 +107,7 @@ export function mockInitFailure(errorMessage: string = "Invalid API key") {
 /**
  * Mock fetch response for successful login
  */
-export function mockLoginSuccess(
-  token?: string,
-  refreshToken?: string,
-  expiresIn: number = 900,
-  refreshExpiresIn: number = 604800
-) {
+export function mockLoginSuccess(token?: string, refreshToken?: string, expiresIn: number = 900, refreshExpiresIn: number = 604800) {
   const mockToken = token || createMockJWT({ username: "testuser" });
   const mockRefreshToken = refreshToken || "refresh-token-123";
 
@@ -178,11 +164,7 @@ export function mockError(errorMessage: string = "UNKNOWN_ERROR") {
 /**
  * Mock fetch response for successful refresh token
  */
-export function mockRefreshSuccess(
-  newToken?: string,
-  newRefreshToken?: string,
-  expiresIn: number = 900
-) {
+export function mockRefreshSuccess(newToken?: string, newRefreshToken?: string, expiresIn: number = 900) {
   const mockNewToken = newToken || createMockJWT({ username: "testuser" });
   const mockNewRefreshToken = newRefreshToken || "new-refresh-token";
 
@@ -239,11 +221,7 @@ export function mockUnauthorizedError() {
  * Wait for a promise to resolve with a timeout
  * Useful for testing async operations
  */
-export async function waitFor(
-  condition: () => boolean,
-  timeout: number = 1000,
-  interval: number = 50
-): Promise<void> {
+export async function waitFor(condition: () => boolean, timeout: number = 1000, interval: number = 50): Promise<void> {
   const startTime = Date.now();
 
   while (!condition()) {
@@ -258,9 +236,7 @@ export async function waitFor(
  * Setup mock fetch for a sequence of responses
  * Useful for testing retry logic and multiple requests
  */
-export function mockFetchSequence(
-  responses: Array<any>
-): typeof globalThis.fetch {
+export function mockFetchSequence(responses: Array<any>): typeof globalThis.fetch {
   let callCount = 0;
 
   return (async () => {

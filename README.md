@@ -1,9 +1,9 @@
-# @nocios/crudify-browser
+# @nocios/crudify-sdk
 
-[![npm version](https://badge.fury.io/js/%40nocios%2Fcrudify-browser.svg)](https://badge.fury.io/js/%40nocios%2Fcrudify-browser)
+[![npm version](https://badge.fury.io/js/%40nocios%2Fcrudify-sdk.svg)](https://badge.fury.io/js/%40nocios%2Fcrudify-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-3178c6.svg)](https://typescriptlang.org/)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://npmjs.com/package/@nocios/crudify-browser)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://npmjs.com/package/@nocios/crudify-sdk)
 
 **Core API SDK for the Crudify ecosystem - Lightweight JavaScript SDK for browser environments with zero dependencies.**
 
@@ -30,7 +30,7 @@ SDK JavaScript ligero para acceder a la API GraphQL de Crudify desde navegadores
 ## 📦 Instalación
 
 ```bash
-npm install @nocios/crudify-browser
+npm install @nocios/crudify-sdk
 ```
 
 Sin dependencias adicionales - completamente standalone.
@@ -38,7 +38,7 @@ Sin dependencias adicionales - completamente standalone.
 ## 🏗️ Configuración Rápida
 
 ```javascript
-import crudify from "@nocios/crudify-browser";
+import crudify from "@nocios/crudify-sdk";
 
 // 1. Configurar ambiente
 crudify.config("dev"); // 'dev' | 'stg' | 'api' | 'prod'
@@ -291,7 +291,7 @@ try {
 Tipos completos incluidos:
 
 ```typescript
-import crudify, { CrudifyResponse, CrudifyTokenData, CrudifyEnvType, NociosError } from "@nocios/crudify-browser";
+import crudify, { CrudifyResponse, CrudifyTokenData, CrudifyEnvType, NociosError } from "@nocios/crudify-sdk";
 
 const response: CrudifyResponse = await crudify.readItems("products", {});
 const tokens: CrudifyTokenData = crudify.getTokenData();
@@ -305,7 +305,7 @@ if (!response.success && response.errorCode === NociosError.Unauthorized) {
 ## 🛠️ Ejemplo Práctico
 
 ```javascript
-import crudify from "@nocios/crudify-browser";
+import crudify from "@nocios/crudify-sdk";
 
 class ProductAPI {
   async init() {

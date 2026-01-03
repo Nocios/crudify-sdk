@@ -1,9 +1,9 @@
-# @nocios/crudify-browser - Documentación Completa
+# @nocios/crudify-sdk - Documentación Completa
 
-[![npm version](https://badge.fury.io/js/%40nocios%2Fcrudify-browser.svg)](https://badge.fury.io/js/%40nocios%2Fcrudify-browser)
+[![npm version](https://badge.fury.io/js/%40nocios%2Fcrudify-sdk.svg)](https://badge.fury.io/js/%40nocios%2Fcrudify-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**@nocios/crudify-browser** es un SDK JavaScript ligero y específico para navegadores que proporciona acceso completo a la API GraphQL de Crudify. Incluye soporte nativo para Refresh Token Pattern, operaciones CRUD completas, transacciones y funcionalidades avanzadas de autenticación.
+**@nocios/crudify-sdk** es un SDK JavaScript ligero y específico para navegadores que proporciona acceso completo a la API GraphQL de Crudify. Incluye soporte nativo para Refresh Token Pattern, operaciones CRUD completas, transacciones y funcionalidades avanzadas de autenticación.
 
 ## 🚀 Características Principales
 
@@ -20,7 +20,7 @@
 ## 📦 Instalación
 
 ```bash
-npm install @nocios/crudify-browser
+npm install @nocios/crudify-sdk
 ```
 
 No requiere dependencias adicionales - completamente standalone para navegadores.
@@ -30,7 +30,7 @@ No requiere dependencias adicionales - completamente standalone para navegadores
 ### Configuración Básica
 
 ```javascript
-import crudify from "@nocios/crudify-browser";
+import crudify from "@nocios/crudify-sdk";
 
 // 1. Configurar el ambiente
 crudify.config("dev"); // 'dev' | 'stg' | 'api' | 'prod'
@@ -289,7 +289,10 @@ if (ordersResult.success) {
   ordersResult.data.items.forEach((order) => {
     console.log("Order:", order._id);
     console.log("Customer:", order.customerId?.name); // Datos poblados
-    console.log("Products:", order.productIds?.map((p) => p.name)); // Array poblado
+    console.log(
+      "Products:",
+      order.productIds?.map((p) => p.name)
+    ); // Array poblado
   });
 }
 
@@ -568,7 +571,7 @@ import crudify, {
   CrudifyLogLevel,
   CrudifyRequestOptions,
   NociosError,
-} from "@nocios/crudify-browser";
+} from "@nocios/crudify-sdk";
 
 // Configuración tipada
 const env: CrudifyEnvType = "prod";
@@ -671,7 +674,7 @@ try {
 ### E-commerce Store
 
 ```javascript
-import crudify from "@nocios/crudify-browser";
+import crudify from "@nocios/crudify-sdk";
 
 class EcommerceAPI {
   constructor() {
@@ -919,7 +922,7 @@ if (!result.success) {
 La librería define códigos de error estandarizados en el enum `NociosError`:
 
 ```javascript
-import { NociosError } from "@nocios/crudify-browser";
+import { NociosError } from "@nocios/crudify-sdk";
 
 // Errores de autenticación
 NociosError.InvalidCredentials; // "INVALID_CREDENTIALS"

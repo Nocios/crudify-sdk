@@ -1,4 +1,4 @@
-# Tests para npm-crudify-core
+# Tests para crudify-sdk
 
 Este proyecto incluye una suite completa de tests unitarios y end-to-end (e2e) utilizando Vitest.
 
@@ -22,21 +22,25 @@ tests/
 ## Comandos Disponibles
 
 ### Ejecutar tests en modo watch (desarrollo)
+
 ```bash
 npm test
 ```
 
 ### Ejecutar tests una vez (CI/CD)
+
 ```bash
 npm run test:run
 ```
 
 ### Ejecutar tests con interfaz visual
+
 ```bash
 npm run test:ui
 ```
 
 ### Generar reporte de cobertura
+
 ```bash
 npm run test:coverage
 ```
@@ -46,6 +50,7 @@ npm run test:coverage
 ### Tests Unitarios (77 tests)
 
 #### Token Validation (12 tests)
+
 - ✅ Validación de tokens JWT
 - ✅ Detección de tokens expirados
 - ✅ Validación de tipos de token (access vs refresh)
@@ -53,6 +58,7 @@ npm run test:coverage
 - ✅ Logout y limpieza de tokens
 
 #### Response Formatting (21 tests)
+
 - ✅ Formateo de errores de campos
 - ✅ Sanitización de datos sensibles
 - ✅ Detección de propiedades peligrosas
@@ -61,12 +67,14 @@ npm run test:coverage
 - ✅ Manejo de JSON inválido
 
 #### Configuration (10 tests)
+
 - ✅ Configuración de entornos (dev, stg, api, prod)
 - ✅ Niveles de logging
 - ✅ Interceptores de respuestas
 - ✅ Callbacks de invalidación de tokens
 
 #### Auth Operations (17 tests)
+
 - ✅ Inicialización del SDK
 - ✅ Login con email/username
 - ✅ Manejo de errores de autenticación
@@ -75,6 +83,7 @@ npm run test:coverage
 - ✅ Logout
 
 #### CRUD Operations (23 tests)
+
 - ✅ createItem / createItemPublic
 - ✅ readItem / readItems
 - ✅ updateItem
@@ -88,6 +97,7 @@ npm run test:coverage
 ### Tests End-to-End (23 tests)
 
 #### Auth Flow (5 tests)
+
 - ✅ Flujo completo: init → login → logout
 - ✅ Manejo de errores de login y retry
 - ✅ Restauración de sesión desde tokens guardados
@@ -95,6 +105,7 @@ npm run test:coverage
 - ✅ Re-inicialización con diferentes entornos
 
 #### Refresh Token Flow (6 tests)
+
 - ✅ Auto-refresh antes de operaciones críticas
 - ✅ Retry automático después de 401
 - ✅ Limpieza de tokens cuando el refresh falla
@@ -103,6 +114,7 @@ npm run test:coverage
 - ✅ Detección de tokens por expirar
 
 #### Complete User Flow (6 tests)
+
 - ✅ Flujo completo de aplicación
 - ✅ Transacciones con múltiples operaciones
 - ✅ Interceptores de respuestas
@@ -113,18 +125,21 @@ npm run test:coverage
 ## Características de Testing
 
 ### Mocking
+
 - ✅ Mock completo de `fetch` API
 - ✅ Mock de respuestas GraphQL
 - ✅ Mock de tokens JWT
 - ✅ Simulación de errores de red
 
 ### Validaciones
+
 - ✅ Validación de estructura de respuestas
 - ✅ Validación de manejo de errores
 - ✅ Validación de seguridad (sanitización)
 - ✅ Validación de flujos de autenticación
 
 ### Escenarios
+
 - ✅ Casos exitosos (happy path)
 - ✅ Casos de error (error handling)
 - ✅ Casos de borde (edge cases)
