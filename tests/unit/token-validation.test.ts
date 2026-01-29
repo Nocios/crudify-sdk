@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
 
 describe("Token Validation", () => {
   beforeEach(() => {

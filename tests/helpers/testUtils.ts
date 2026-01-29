@@ -3,7 +3,7 @@
  * Provides helper functions for testing Crudify SDK
  */
 
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
 
 /**
  * Reset Crudify singleton state completely between tests

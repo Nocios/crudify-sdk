@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
+import type { CrudifyResponse } from "../../src/types";
 import { resetCrudifyState, mockInitSuccess, createMockJWT, mockCrudSuccess } from "../helpers/testUtils";
+import type { SignedUrlResponseData } from "../types/responses";
 
 describe("CRUD Operations", () => {
   let originalFetch: typeof globalThis.fetch;
@@ -73,9 +75,7 @@ describe("CRUD Operations", () => {
     it("should throw error when not initialized", async () => {
       (CrudifyInstance as any).endpoint = "";
 
-      await expect(CrudifyInstance.createItem("users", {})).rejects.toThrow(
-        "Not initialized"
-      );
+      await expect(CrudifyInstance.createItem("users", {})).rejects.toThrow("Not initialized");
     });
   });
 
@@ -485,13 +485,13 @@ describe("CRUD Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.generateSignedUrl({
+      const result = (await CrudifyInstance.generateSignedUrl({
         fileName: "file.jpg",
         contentType: "image/jpeg",
-      });
+      })) as CrudifyResponse<SignedUrlResponseData>;
 
       expect(result.success).toBe(true);
-      expect(result.data.url).toBe(mockUrl);
+      expect(result.data?.url).toBe(mockUrl);
     });
 
     it("should throw error when not authenticated", async () => {
@@ -501,7 +501,7 @@ describe("CRUD Operations", () => {
         CrudifyInstance.generateSignedUrl({
           fileName: "file.jpg",
           contentType: "image/jpeg",
-        })
+        }),
       ).rejects.toThrow("Not initialized");
     });
   });
@@ -521,18 +521,14 @@ describe("CRUD Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.createItem(
-        "users",
-        { name: "Test" },
-        { signal: controller.signal }
-      );
+      const result = await CrudifyInstance.createItem("users", { name: "Test" }, { signal: controller.signal });
 
       expect(result.success).toBe(true);
       expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           signal: controller.signal,
-        })
+        }),
       );
     });
   });

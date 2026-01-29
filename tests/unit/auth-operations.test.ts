@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
+import type { CrudifyResponse } from "../../src/types";
 import { resetCrudifyState, mockInitSuccess, mockLoginSuccess, mockError, mockRefreshSuccess } from "../helpers/testUtils";
+import type { LoginResponseData, RefreshTokenResponseData } from "../types/responses";
 
 describe("Authentication Operations", () => {
   let originalFetch: typeof globalThis.fetch;
@@ -48,9 +50,7 @@ describe("Authentication Operations", () => {
         }),
       });
 
-      await expect(CrudifyInstance.init("invalid-key")).rejects.toThrow(
-        "Failed to initialize Crudify"
-      );
+      await expect(CrudifyInstance.init("invalid-key")).rejects.toThrow("Failed to initialize Crudify");
     });
 
     it("should reset tokens on re-initialization", async () => {
@@ -111,7 +111,8 @@ describe("Authentication Operations", () => {
     });
 
     it("should login successfully with email and password", async () => {
-      const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+      const mockToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
       const mockRefreshToken = "refresh-token-123";
 
       globalThis.fetch = vi.fn().mockResolvedValue({
@@ -130,7 +131,7 @@ describe("Authentication Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.login("test@example.com", "password123");
+      const result = (await CrudifyInstance.login("test@example.com", "password123")) as CrudifyResponse<LoginResponseData>;
 
       expect(result.success).toBe(true);
       expect(result.data?.loginStatus).toBe("successful");
@@ -205,9 +206,7 @@ describe("Authentication Operations", () => {
       (CrudifyInstance as any).endpoint = "";
       (CrudifyInstance as any).apiKey = "";
 
-      await expect(CrudifyInstance.login("test@example.com", "password")).rejects.toThrow(
-        "Not initialized"
-      );
+      await expect(CrudifyInstance.login("test@example.com", "password")).rejects.toThrow("Not initialized");
     });
   });
 
@@ -262,7 +261,7 @@ describe("Authentication Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.refreshAccessToken();
+      const result = (await CrudifyInstance.refreshAccessToken()) as CrudifyResponse<RefreshTokenResponseData>;
 
       expect(result.success).toBe(true);
       expect(result.data?.token).toBe(newToken);

@@ -1,12 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
-import {
-  resetCrudifyState,
-  createMockJWT,
-  mockInitSuccess,
-  mockLoginSuccess,
-  mockError,
-} from "../helpers/testUtils";
+import { CrudifyInstance } from "../../src/crudify";
+import { resetCrudifyState, createMockJWT } from "../helpers/testUtils";
 
 describe("E2E: Authentication Flow", () => {
   let originalFetch: typeof globalThis.fetch;

@@ -23,7 +23,6 @@
 export type LogLevel = "error" | "warn" | "info" | "debug";
 export type CrudifyLogLevel = "none" | "debug" | "info" | "warn" | "error";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Log context needs to accept any serializable value
 export interface LogContext {
   [key: string]: unknown;
 }
@@ -174,6 +173,7 @@ class Logger {
 
     const output = JSON.stringify(logEntry);
 
+    /* eslint-disable no-console */
     switch (level) {
       case "error":
         console.error(output);
@@ -188,6 +188,7 @@ class Logger {
         console.log(output);
         break;
     }
+    /* eslint-enable no-console */
   }
 
   /**
@@ -217,7 +218,7 @@ class Logger {
     }
 
     // Multiple arguments - convert to array context
-    return { args: args.map((arg, i) => (arg instanceof Error ? { error: arg.message, stack: arg.stack } : arg)) };
+    return { args: args.map((arg, _i) => (arg instanceof Error ? { error: arg.message, stack: arg.stack } : arg)) };
   }
 
   /**

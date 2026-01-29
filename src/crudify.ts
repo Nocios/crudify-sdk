@@ -227,7 +227,7 @@ class Crudify implements CrudifyPublicAPI {
 
   public init = async (
     publicApiKey: string,
-    logLevel?: CrudifyLogLevel
+    logLevel?: CrudifyLogLevel,
   ): Promise<{ apiEndpointAdmin?: string; apiKeyEndpointAdmin?: string }> => {
     // Guard: Already initialized
     if (this.isInitialized) {
@@ -261,7 +261,7 @@ class Crudify implements CrudifyPublicAPI {
   // Extracted actual initialization logic
   private performInit = async (
     publicApiKey: string,
-    logLevel?: CrudifyLogLevel
+    logLevel?: CrudifyLogLevel,
   ): Promise<{ apiEndpointAdmin?: string; apiKeyEndpointAdmin?: string }> => {
     this.logLevel = logLevel || "none";
     logger.setLogLevel(this.logLevel);
@@ -303,12 +303,15 @@ class Crudify implements CrudifyPublicAPI {
 
   private formatErrorsInternal = (issues: CrudifyIssue[]): Record<string, string[]> => {
     logger.debug("FormatErrors Issues:", this.sanitizeForLogging(issues));
-    return issues.reduce((acc, issue) => {
-      const key = String(issue.path[0] ?? "_error");
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(issue.message);
-      return acc;
-    }, {} as Record<string, string[]>);
+    return issues.reduce(
+      (acc, issue) => {
+        const key = String(issue.path[0] ?? "_error");
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(issue.message);
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    );
   };
 
   private containsDangerousProperties = (obj: unknown, depth = 0): boolean => {
@@ -594,7 +597,7 @@ class Crudify implements CrudifyPublicAPI {
       {
         ...(!this.token ? { "x-api-key": this.apiKey } : { Authorization: `Bearer ${this.token}` }),
       },
-      options?.signal
+      options?.signal,
     );
 
     // Handle authentication errors
@@ -604,7 +607,7 @@ class Crudify implements CrudifyPublicAPI {
           error.message?.includes("Unauthorized") ||
           error.message?.includes("Invalid token") ||
           error.message?.includes("NOT_AUTHORIZED_TO_ACCESS") ||
-          error.extensions?.code === "UNAUTHENTICATED"
+          error.extensions?.code === "UNAUTHENTICATED",
       );
 
       if (hasAuthError) {
@@ -614,7 +617,7 @@ class Crudify implements CrudifyPublicAPI {
             errors: rawResponse.errors,
             hasRefreshToken: !!this.refreshToken,
             isRefreshExpired: this.isRefreshTokenExpired(),
-          })
+          }),
         );
       }
 
@@ -655,7 +658,7 @@ class Crudify implements CrudifyPublicAPI {
     query: string,
     variables: object = {},
     extraHeaders: { [key: string]: string } = {},
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ) => {
     if (!this.endpoint) {
       throw new Error("Crudify: Not properly initialized or endpoint missing. Call init() method first.");
@@ -1021,7 +1024,7 @@ class Crudify implements CrudifyPublicAPI {
    */
   public generateSignedUrl = async (
     data: { fileName: string; contentType: string; visibility?: "public" | "private" },
-    options?: CrudifyRequestOptions
+    options?: CrudifyRequestOptions,
   ): Promise<CrudifyResponse> => {
     if (!this.endpoint || !this.token) throw new Error("Crudify: Not initialized. Call init() first.");
 
@@ -1036,7 +1039,7 @@ class Crudify implements CrudifyPublicAPI {
       mutationGenerateSignedUrl,
       { data: JSON.stringify(requestData) },
       { Authorization: `Bearer ${this.token}` },
-      options?.signal
+      options?.signal,
     );
     const internalResponse = this.formatResponseInternal(rawResponse);
 
@@ -1071,7 +1074,7 @@ class Crudify implements CrudifyPublicAPI {
   public readItem = async (
     moduleKey: string,
     filter: { _id: string } | object,
-    options?: CrudifyRequestOptions
+    options?: CrudifyRequestOptions,
   ): Promise<CrudifyResponse> => {
     return this.performCrudOperation(queryReadItem, { moduleKey, data: JSON.stringify(filter) }, options);
   };
@@ -1135,4 +1138,5 @@ class Crudify implements CrudifyPublicAPI {
   }
 }
 
-export default Crudify.getInstance();
+const CrudifyInstance = Crudify.getInstance();
+export { CrudifyInstance };

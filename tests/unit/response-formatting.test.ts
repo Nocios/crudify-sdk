@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { NociosError } from "../../src/types";
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
 import pako from "pako";
 
 describe("Response Formatting", () => {

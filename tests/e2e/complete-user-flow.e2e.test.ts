@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
-import { resetCrudifyState, createMockJWT } from "../helpers/testUtils";
+import { CrudifyInstance } from "../../src/crudify";
+import type { CrudifyResponse } from "../../src/types";
+import { resetCrudifyState } from "../helpers/testUtils";
+import type { PermissionsResponseData, UserResponseData, SignedUrlResponseData, StructureResponseData } from "../types/responses";
 
 describe("E2E: Complete User Flow", () => {
   let originalFetch: typeof globalThis.fetch;
@@ -68,7 +70,7 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const permissionsResult = await CrudifyInstance.getPermissions();
+    const permissionsResult = (await CrudifyInstance.getPermissions()) as CrudifyResponse<PermissionsResponseData>;
     expect(permissionsResult.success).toBe(true);
     expect(permissionsResult.data?.modules).toContain("users");
 
@@ -84,10 +86,10 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const createResult = await CrudifyInstance.createItem("users", {
+    const createResult = (await CrudifyInstance.createItem("users", {
       name: "John Doe",
       email: "john@example.com",
-    });
+    })) as CrudifyResponse<UserResponseData>;
     expect(createResult.success).toBe(true);
     expect(createResult.data?._id).toBe("user123");
 
@@ -103,7 +105,7 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const readResult = await CrudifyInstance.readItem("users", { _id: "user123" });
+    const readResult = (await CrudifyInstance.readItem("users", { _id: "user123" })) as CrudifyResponse<UserResponseData>;
     expect(readResult.success).toBe(true);
     expect(readResult.data?.name).toBe("John Doe");
 
@@ -119,10 +121,10 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const updateResult = await CrudifyInstance.updateItem("users", {
+    const updateResult = (await CrudifyInstance.updateItem("users", {
       _id: "user123",
       name: "John Smith",
-    });
+    })) as CrudifyResponse<UserResponseData>;
     expect(updateResult.success).toBe(true);
     expect(updateResult.data?.name).toBe("John Smith");
 
@@ -258,13 +260,13 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const signedUrlResult = await CrudifyInstance.generateSignedUrl({
+    const signedUrlResult = (await CrudifyInstance.generateSignedUrl({
       fileName: "profile.jpg",
       contentType: "image/jpeg",
-    });
+    })) as CrudifyResponse<SignedUrlResponseData>;
 
     expect(signedUrlResult.success).toBe(true);
-    expect(signedUrlResult.data.url).toBe(mockSignedUrl);
+    expect(signedUrlResult.data?.url).toBe(mockSignedUrl);
 
     // Simulate uploading to signed URL (external fetch, not mocked here)
     // In real scenario: await fetch(signedUrlResult.data.url, { method: 'PUT', body: fileData })
@@ -285,10 +287,10 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const createUserResult = await CrudifyInstance.createItem("users", {
+    const createUserResult = (await CrudifyInstance.createItem("users", {
       name: "John",
       profileImage: mockSignedUrl.split("?")[0],
-    });
+    })) as CrudifyResponse<UserResponseData>;
 
     expect(createUserResult.success).toBe(true);
     expect(createUserResult.data?.profileImage).toBeDefined();
@@ -343,7 +345,7 @@ describe("E2E: Complete User Flow", () => {
       expect.any(String),
       expect.objectContaining({
         signal: controller.signal,
-      })
+      }),
     );
   });
 
@@ -378,7 +380,7 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const structureResult = await CrudifyInstance.getStructurePublic();
+    const structureResult = (await CrudifyInstance.getStructurePublic()) as CrudifyResponse<StructureResponseData>;
     expect(structureResult.success).toBe(true);
     expect(structureResult.data?.modules?.posts).toBeDefined();
 

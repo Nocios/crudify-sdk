@@ -1,4 +1,4 @@
-import CrudifyInstance from "./crudify";
+import { CrudifyInstance } from "./crudify";
 import {
   CrudifyAWSJSON,
   CrudifyEnvType,
@@ -41,4 +41,4 @@ export {
   NociosError,
 };
 
-export default CrudifyInstance;
+export { CrudifyInstance };

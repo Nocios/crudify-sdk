@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
+import { CrudifyInstance } from "../../src/crudify";
+import type { CrudifyResponse } from "../../src/types";
 import { resetCrudifyState, mockInitSuccess } from "../helpers/testUtils";
+import type { SequenceResponseData } from "../types/responses";
 
 describe("Sequence Operations", () => {
   let originalFetch: typeof globalThis.fetch;
@@ -37,11 +39,11 @@ describe("Sequence Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.getNextSequence("PROD-");
+      const result = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockSequence);
-      expect(result.data.value).toBe(13671);
+      expect(result.data?.value).toBe(13671);
     });
 
     it("should handle different prefixes", async () => {
@@ -61,10 +63,10 @@ describe("Sequence Operations", () => {
           }),
         });
 
-        const result = await CrudifyInstance.getNextSequence(prefix);
+        const result = (await CrudifyInstance.getNextSequence(prefix)) as CrudifyResponse<SequenceResponseData>;
 
         expect(result.success).toBe(true);
-        expect(result.data.value).toBe(mockValue);
+        expect(result.data?.value).toBe(mockValue);
       }
     });
 
@@ -82,17 +84,17 @@ describe("Sequence Operations", () => {
         }),
       }));
 
-      const result1 = await CrudifyInstance.getNextSequence("PROD-");
+      const result1 = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
       expect(result1.success).toBe(true);
-      expect(result1.data.value).toBe(101);
+      expect(result1.data?.value).toBe(101);
 
-      const result2 = await CrudifyInstance.getNextSequence("PROD-");
+      const result2 = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
       expect(result2.success).toBe(true);
-      expect(result2.data.value).toBe(102);
+      expect(result2.data?.value).toBe(102);
 
-      const result3 = await CrudifyInstance.getNextSequence("PROD-");
+      const result3 = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
       expect(result3.success).toBe(true);
-      expect(result3.data.value).toBe(103);
+      expect(result3.data?.value).toBe(103);
     });
 
     it("should return error when prefix is missing", async () => {
@@ -191,7 +193,7 @@ describe("Sequence Operations", () => {
         expect.any(String),
         expect.objectContaining({
           signal: controller.signal,
-        })
+        }),
       );
     });
 
@@ -221,10 +223,10 @@ describe("Sequence Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.getNextSequence("PROD-");
+      const result = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
 
       expect(result.success).toBe(true);
-      expect(result.data.value).toBe(999);
+      expect(result.data?.value).toBe(999);
     });
   });
 
@@ -241,12 +243,12 @@ describe("Sequence Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.getNextSequence("PROD-");
+      const result = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
 
       expect(result.success).toBe(true);
 
       // Simulate formatting in application code
-      const sequenceNumber = result.data.value;
+      const sequenceNumber = result.data?.value;
       const barCode = `PROD-${String(sequenceNumber).padStart(7, "0")}`;
 
       expect(barCode).toBe("PROD-0013671");
@@ -264,11 +266,11 @@ describe("Sequence Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.getNextSequence("PROD-");
+      const result = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
 
       expect(result.success).toBe(true);
 
-      const sequenceNumber = result.data.value;
+      const sequenceNumber = result.data?.value;
       const barCode = `PROD-${String(sequenceNumber).padStart(7, "0")}`;
 
       expect(barCode).toBe("PROD-0000001");
@@ -286,11 +288,11 @@ describe("Sequence Operations", () => {
         }),
       });
 
-      const result = await CrudifyInstance.getNextSequence("PROD-");
+      const result = (await CrudifyInstance.getNextSequence("PROD-")) as CrudifyResponse<SequenceResponseData>;
 
       expect(result.success).toBe(true);
 
-      const sequenceNumber = result.data.value;
+      const sequenceNumber = result.data?.value;
       const barCode = `PROD-${String(sequenceNumber).padStart(7, "0")}`;
 
       expect(barCode).toBe("PROD-9999999");

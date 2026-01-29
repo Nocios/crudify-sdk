@@ -4,7 +4,7 @@
     "lib": ["ESNext", "DOM"],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
@@ -16,5 +16,5 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/types/global.d.ts"]
+  "include": ["src", "src/types/global.d.ts", "tests"]
 }

@@ -92,9 +92,9 @@ export type CrudifyResponse<T = unknown> = {
  * Internal representation of a response within Crudify, potentially more detailed.
  * @internal
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Internal type needs flexibility for varying API response structures
 export type InternalCrudifyResponseType = {
   success: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Internal type needs flexibility for varying API response structures
   data?: any;
   errors?: CrudifyFieldErrors;
   fieldsWarning?: Record<string, string[]> | null;
@@ -184,7 +184,7 @@ export interface CrudifyPublicAPI {
   getNextSequence: (prefix: string, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   generateSignedUrl: (
     data: { fileName: string; contentType: string; visibility?: "public" | "private" },
-    options?: CrudifyRequestOptions
+    options?: CrudifyRequestOptions,
   ) => Promise<CrudifyResponse>;
   getFileUrl: (data: { filePath: string; expiresIn?: number }, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;
   disableFile: (data: { filePath: string }, options?: CrudifyRequestOptions) => Promise<CrudifyResponse>;

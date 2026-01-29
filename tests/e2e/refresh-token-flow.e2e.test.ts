@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import CrudifyInstance from "../../src/crudify";
-import { resetCrudifyState, createMockJWT, createExpiredJWT } from "../helpers/testUtils";
+import { CrudifyInstance } from "../../src/crudify";
+import { resetCrudifyState } from "../helpers/testUtils";
 
 describe("E2E: Refresh Token Flow", () => {
   let originalFetch: typeof globalThis.fetch;
