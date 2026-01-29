@@ -2,6 +2,7 @@ import { _fetch, shutdownNodeSpecifics } from "./fetch-impl";
 import pako from "pako";
 import {
   CrudifyEnvType,
+  CrudifyFieldErrors,
   CrudifyIssue,
   CrudifyLogLevel,
   CrudifyPublicAPI,
@@ -10,6 +11,7 @@ import {
   CrudifyRequestOptions,
   CrudifyResponseInterceptor,
   RawGraphQLResponse,
+  GraphQLError,
   NociosError,
   CrudifyTokenConfig,
   TransactionInput,
@@ -214,12 +216,12 @@ class Crudify implements CrudifyPublicAPI {
 
   private constructor() {}
 
-  public getLogLevel = (): CrudifyLogLevel => {
+  public readonly getLogLevel = (): CrudifyLogLevel => {
     return this.logLevel;
   };
 
-  public config = (env: CrudifyEnvType): void => {
-    const selectedEnv = env || "api";
+  public readonly config = (env: CrudifyEnvType = "api"): void => {
+    const selectedEnv = env;
     Crudify.ApiMetadata = dataMasters[selectedEnv]?.ApiMetadata || dataMasters.api.ApiMetadata;
     Crudify.ApiKeyMetadata = dataMasters[selectedEnv]?.ApiKeyMetadata || dataMasters.api.ApiKeyMetadata;
     logger.setConfig(selectedEnv, this.logLevel);
@@ -259,7 +261,7 @@ class Crudify implements CrudifyPublicAPI {
   };
 
   // Extracted actual initialization logic
-  private performInit = async (
+  private readonly performInit = async (
     publicApiKey: string,
     logLevel?: CrudifyLogLevel,
   ): Promise<{ apiEndpointAdmin?: string; apiKeyEndpointAdmin?: string }> => {
@@ -301,7 +303,7 @@ class Crudify implements CrudifyPublicAPI {
     }
   };
 
-  private formatErrorsInternal = (issues: CrudifyIssue[]): Record<string, string[]> => {
+  private readonly formatErrorsInternal = (issues: CrudifyIssue[]): Record<string, string[]> => {
     logger.debug("FormatErrors Issues:", this.sanitizeForLogging(issues));
     return issues.reduce(
       (acc, issue) => {
@@ -314,12 +316,12 @@ class Crudify implements CrudifyPublicAPI {
     );
   };
 
-  private containsDangerousProperties = (obj: unknown, depth = 0): boolean => {
+  private readonly containsDangerousProperties = (obj: unknown, depth = 0): boolean => {
     if (depth > 10) return false;
 
     if (!obj || typeof obj !== "object") return false;
 
-    const dangerousKeys = [
+    const dangerousKeys = new Set([
       "__proto__",
       "constructor",
       "prototype",
@@ -332,11 +334,11 @@ class Crudify implements CrudifyPublicAPI {
       "exports",
       "global",
       "process",
-    ];
+    ]);
 
     const record = obj as Record<string, unknown>;
     for (const key in record) {
-      if (dangerousKeys.includes(key.toLowerCase())) {
+      if (dangerousKeys.has(key.toLowerCase())) {
         return true;
       }
 
@@ -347,17 +349,20 @@ class Crudify implements CrudifyPublicAPI {
     return false;
   };
 
-  private sanitizeForLogging = (data: unknown): unknown => {
+  private readonly sanitizeString = (value: string): string => {
+    if (value.length > 10000) {
+      return value.substring(0, 100) + `... [truncated ${value.length} chars]`;
+    }
+    if (value.length > 20 && (value.includes("da2-") || value.includes("ey") || /^[a-zA-Z0-9_-]{20,}$/.exec(value))) {
+      return value.substring(0, 6) + "******";
+    }
+    return value;
+  };
+
+  private readonly sanitizeForLogging = (data: unknown): unknown => {
     if (!data || typeof data !== "object") {
-      // Mask strings that look like tokens or API keys
       if (typeof data === "string") {
-        // Truncate very large strings to prevent regex performance issues
-        if (data.length > 10000) {
-          return data.substring(0, 100) + `... [truncated ${data.length} chars]`;
-        }
-        if (data.length > 20 && (data.includes("da2-") || data.includes("ey") || data.match(/^[a-zA-Z0-9_-]{20,}$/))) {
-          return data.substring(0, 6) + "******";
-        }
+        return this.sanitizeString(data);
       }
       return data;
     }
@@ -396,146 +401,120 @@ class Crudify implements CrudifyPublicAPI {
     return sanitized;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response structure varies by operation
-  private formatResponseInternal = (response: RawGraphQLResponse<any>): InternalCrudifyResponseType => {
-    if (response.errors) {
-      const errorMessages = response.errors.map((err) => String(err.message || "UNKNOWN_GRAPHQL_ERROR"));
-      return {
-        success: false,
-        errors: { _graphql: errorMessages.map((x: string) => x.toUpperCase().replace(/ /g, "_").replace(/\./g, "")) },
-      };
+  private readonly decompressGzipData = (base64Data: string): string | null => {
+    try {
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.codePointAt(i) ?? 0;
+      }
+      const decompressed = pako.inflate(bytes, { to: "string" });
+      logger.debug("Decompressed GZIP response", {
+        compressedSize: base64Data.length,
+        decompressedSize: decompressed.length,
+      });
+      return decompressed;
+    } catch (decompressionError) {
+      logger.error("Failed to decompress GZIP response", decompressionError);
+      return null;
+    }
+  };
+
+  private readonly isValidJsonStart = (trimmed: string): boolean => {
+    return (
+      trimmed.startsWith("{") ||
+      trimmed.startsWith("[") ||
+      trimmed.startsWith('"') ||
+      trimmed === "null" ||
+      trimmed === "true" ||
+      trimmed === "false" ||
+      /^\d+(\.\d+)?$/.test(trimmed)
+    );
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic JSON parsing requires flexible typing
+  private readonly parseResponseData = (apiResponseData: unknown): { data: any; error?: string } => {
+    if (!apiResponseData) {
+      return { data: null };
     }
 
-    if (!response.data || !response.data.response) {
-      logger.error("FormatResponse: Invalid response structure", this.sanitizeForLogging(response));
-      return { success: false, errors: { _error: ["INVALID_RESPONSE_STRUCTURE"] } };
+    const COMPRESSION_KEY = "_gzip";
+    let rawData: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic JSON parsing requires flexible typing
+    let parsedData: any = apiResponseData;
+
+    // Helper to safely stringify data without producing [object Object]
+    const stringifyData = (data: unknown): string => {
+      if (typeof data === "string") return data;
+      if (data === null || data === undefined) return "";
+      return JSON.stringify(data);
+    };
+
+    if (typeof apiResponseData === "string") {
+      try {
+        parsedData = JSON.parse(apiResponseData);
+      } catch {
+        parsedData = null;
+      }
     }
 
-    const apiResponse = response.data.response;
-    const status = apiResponse.status ?? "Unknown";
-    const errorCode = apiResponse.errorCode as NociosError | undefined;
-    let dataResponse;
+    if (parsedData && typeof parsedData === "object" && COMPRESSION_KEY in parsedData) {
+      const decompressed = this.decompressGzipData(parsedData[COMPRESSION_KEY]);
+      rawData = decompressed ?? stringifyData(apiResponseData);
+    } else {
+      rawData = stringifyData(apiResponseData);
+    }
+
+    if (rawData.length > 10 * 1024 * 1024) {
+      return { data: null, error: "Response data too large" };
+    }
+
+    const trimmed = rawData.trim();
+    if (!this.isValidJsonStart(trimmed)) {
+      return { data: null, error: "Invalid JSON format" };
+    }
 
     try {
-      if (!apiResponse.data) {
-        dataResponse = null;
-      } else {
-        // Handle GZIP compressed responses (object wrapper format: { _gzip: "base64..." })
-        const COMPRESSION_KEY = "_gzip";
-        let rawData: string;
-
-        // AWSJSON always returns a string - parse it first to check for compression
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic JSON parsing requires flexible typing
-        let parsedData: any = apiResponse.data;
-        if (typeof apiResponse.data === "string") {
-          try {
-            parsedData = JSON.parse(apiResponse.data);
-          } catch {
-            // Not valid JSON, use as-is
-            parsedData = null;
-          }
-        }
-
-        // Check if data is a compressed object wrapper
-        if (parsedData && typeof parsedData === "object" && COMPRESSION_KEY in parsedData) {
-          try {
-            const base64Data = parsedData[COMPRESSION_KEY];
-            const binaryString = atob(base64Data);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
-            }
-            const decompressed = pako.inflate(bytes, { to: "string" });
-            rawData = decompressed;
-            logger.debug("Decompressed GZIP response", {
-              compressedSize: base64Data.length,
-              decompressedSize: rawData.length,
-            });
-          } catch (decompressionError) {
-            logger.error("Failed to decompress GZIP response", decompressionError);
-            // On decompression failure, use original string
-            rawData = String(apiResponse.data);
-          }
-        } else {
-          // Normal uncompressed data - use original string
-          rawData = String(apiResponse.data);
-        }
-
-        // Verificar que no sea excesivamente largo (DoS protection)
-        if (rawData.length > 10 * 1024 * 1024) {
-          // 10MB limit
-          throw new Error("Response data too large");
-        }
-
-        // Verificar que comience con caracteres válidos de JSON
-        const trimmed = rawData.trim();
-        if (
-          !trimmed.startsWith("{") &&
-          !trimmed.startsWith("[") &&
-          !trimmed.startsWith('"') &&
-          trimmed !== "null" &&
-          trimmed !== "true" &&
-          trimmed !== "false" &&
-          !/^\d+(\.\d+)?$/.test(trimmed)
-        ) {
-          throw new Error("Invalid JSON format");
-        }
-
-        dataResponse = JSON.parse(rawData);
-
-        // Validación post-parsing para objetos
-        if (dataResponse && typeof dataResponse === "object") {
-          // Verificar que no tenga propiedades peligrosas
-          if (this.containsDangerousProperties(dataResponse)) {
-            logger.warn("FormatResponse: Potentially dangerous properties detected");
-          }
-        }
+      const parsed = JSON.parse(rawData);
+      if (parsed && typeof parsed === "object" && this.containsDangerousProperties(parsed)) {
+        logger.warn("FormatResponse: Potentially dangerous properties detected");
       }
-    } catch (e) {
-      logger.error("FormatResponse: Failed to parse data", this.sanitizeForLogging(apiResponse.data), this.sanitizeForLogging(e));
-      if (status === "OK" || status === "WARNING") {
-        return { success: false, errors: { _error: ["INVALID_DATA_FORMAT_IN_SUCCESSFUL_RESPONSE"] } };
-      }
-      dataResponse = { _raw: apiResponse.data, _parsingError: (e as Error).message };
+      return { data: parsed };
+    } catch {
+      return { data: null, error: "JSON parse error" };
     }
+  };
 
-    logger.debug("FormatResponse Status:", status);
-    logger.debug("FormatResponse Parsed Data:", this.sanitizeForLogging(dataResponse));
-    logger.debug("FormatResponse ErrorCode:", errorCode);
-
+  private readonly handleResponseStatus = (
+    status: string,
+    dataResponse: unknown,
+    fieldsWarning: Record<string, string[]> | null | undefined,
+    errorCode: NociosError | undefined,
+  ): InternalCrudifyResponseType => {
     switch (status) {
       case "OK":
       case "WARNING":
-        return { success: true, data: dataResponse, fieldsWarning: apiResponse.fieldsWarning, errorCode };
+        return { success: true, data: dataResponse, fieldsWarning, errorCode };
       case "FIELD_ERROR":
         return { success: false, errors: this.formatErrorsInternal(dataResponse as CrudifyIssue[]), errorCode };
       case "ITEM_NOT_FOUND":
         return { success: false, errors: { _id: ["ITEM_NOT_FOUND"] }, errorCode: errorCode || NociosError.ItemNotFound };
-      case "ERROR":
-        if (Array.isArray(dataResponse))
+      case "ERROR": {
+        if (Array.isArray(dataResponse)) {
           return { success: false, data: dataResponse, errors: { _transaction: ["ONE_OR_MORE_OPERATIONS_FAILED"] }, errorCode };
-        // if (Array.isArray(dataResponse)) {
-        //   const formattedTransaction = dataResponse.map(({ action, response: opRes }) => {
-        //     let opData = null;
-        //     let opErrors: any = opRes.errors;
-        //     try {
-        //       opData = opRes.data ? JSON.parse(opRes.data) : null;
-        //     } catch (e) {
-        //       opData = { _raw: opRes.data, _parsingError: (e as Error).message };
-        //     }
-        //     if (opRes.status === "FIELD_ERROR" && opRes.errors) {
-        //       opErrors = this.formatErrorsInternal(opRes.errors as CrudifyIssue[]);
-        //     }
-        //     return { action, status: opRes.status, data: opData, errors: opErrors, fieldsWarning: opRes.fieldsWarning };
-        //   });
-        //   return { success: false, data: formattedTransaction, errors: { _transaction: ["ONE_OR_MORE_OPERATIONS_FAILED"] } };
-        // }
-
+        }
+        // Helper to safely stringify value without producing [object Object]
+        const stringifyValue = (value: unknown): string => {
+          if (value === null || value === undefined) return "UNKNOWN_ERROR";
+          if (typeof value === "string") return value;
+          return JSON.stringify(value);
+        };
         const finalErrors =
           typeof dataResponse === "object" && dataResponse !== null && !Array.isArray(dataResponse)
-            ? dataResponse
-            : { _error: [String(dataResponse || "UNKNOWN_ERROR")] };
+            ? (dataResponse as CrudifyFieldErrors)
+            : { _error: [stringifyValue(dataResponse)] };
         return { success: false, errors: finalErrors, errorCode: errorCode || NociosError.InternalServerError };
+      }
       default:
         return {
           success: false,
@@ -545,7 +524,44 @@ class Crudify implements CrudifyPublicAPI {
     }
   };
 
-  private adaptToPublicResponse = (internalResp: InternalCrudifyResponseType): CrudifyResponse => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response structure varies by operation
+  private readonly formatResponseInternal = (response: RawGraphQLResponse<any>): InternalCrudifyResponseType => {
+    if (response.errors) {
+      const errorMessages = response.errors.map((err) => String(err.message || "UNKNOWN_GRAPHQL_ERROR"));
+      return {
+        success: false,
+        errors: { _graphql: errorMessages.map((x: string) => x.toUpperCase().replaceAll(" ", "_").replaceAll(".", "")) },
+      };
+    }
+
+    if (!response.data?.response) {
+      logger.error("FormatResponse: Invalid response structure", this.sanitizeForLogging(response));
+      return { success: false, errors: { _error: ["INVALID_RESPONSE_STRUCTURE"] } };
+    }
+
+    const apiResponse = response.data.response;
+    const status = apiResponse.status ?? "Unknown";
+    const errorCode = apiResponse.errorCode as NociosError | undefined;
+
+    const parseResult = this.parseResponseData(apiResponse.data);
+    let dataResponse = parseResult.data;
+
+    if (parseResult.error) {
+      logger.error("FormatResponse: Failed to parse data", this.sanitizeForLogging(apiResponse.data), parseResult.error);
+      if (status === "OK" || status === "WARNING") {
+        return { success: false, errors: { _error: ["INVALID_DATA_FORMAT_IN_SUCCESSFUL_RESPONSE"] } };
+      }
+      dataResponse = { _raw: apiResponse.data, _parsingError: parseResult.error };
+    }
+
+    logger.debug("FormatResponse Status:", status);
+    logger.debug("FormatResponse Parsed Data:", this.sanitizeForLogging(dataResponse));
+    logger.debug("FormatResponse ErrorCode:", errorCode);
+
+    return this.handleResponseStatus(status, dataResponse, apiResponse.fieldsWarning, errorCode);
+  };
+
+  private readonly adaptToPublicResponse = (internalResp: InternalCrudifyResponseType): CrudifyResponse => {
     if (internalResp.errors && typeof internalResp.errors === "object" && !Array.isArray(internalResp.errors)) {
       return {
         success: internalResp.success,
@@ -562,6 +578,49 @@ class Crudify implements CrudifyPublicAPI {
       fieldsWarning: internalResp.fieldsWarning,
       errorCode: internalResp.errorCode,
     };
+  };
+
+  private readonly isAuthError = (errors: GraphQLError[]): boolean => {
+    return errors.some(
+      (error) =>
+        error.message?.includes("Unauthorized") ||
+        error.message?.includes("Invalid token") ||
+        error.message?.includes("NOT_AUTHORIZED_TO_ACCESS") ||
+        error.extensions?.code === "UNAUTHENTICATED",
+    );
+  };
+
+  private readonly handleAuthErrorWithRetry = async (
+    rawResponse: RawGraphQLResponse,
+    query: string,
+    variables: object,
+    signal?: AbortSignal,
+  ): Promise<RawGraphQLResponse> => {
+    if (!rawResponse.errors) return rawResponse;
+
+    const hasAuthError = this.isAuthError(rawResponse.errors);
+    if (!hasAuthError) return rawResponse;
+
+    logger.warn(
+      "Authorization error detected",
+      this.sanitizeForLogging({
+        errors: rawResponse.errors,
+        hasRefreshToken: !!this.refreshToken,
+        isRefreshExpired: this.isRefreshTokenExpired(),
+      }),
+    );
+
+    if (!this.refreshToken || this.isRefreshTokenExpired()) return rawResponse;
+
+    logger.info("Received auth error, attempting token refresh...");
+    const refreshResult = await this.refreshAccessToken();
+
+    if (refreshResult.success) {
+      return this.executeQuery(query, variables, { Authorization: `Bearer ${this.token}` }, signal);
+    }
+
+    this.clearTokensAndRefreshState();
+    return rawResponse;
   };
 
   private async performCrudOperation(query: string, variables: object, options?: CrudifyRequestOptions): Promise<CrudifyResponse> {
@@ -595,45 +654,13 @@ class Crudify implements CrudifyPublicAPI {
       query,
       variables,
       {
-        ...(!this.token ? { "x-api-key": this.apiKey } : { Authorization: `Bearer ${this.token}` }),
+        ...(this.token ? { Authorization: `Bearer ${this.token}` } : { "x-api-key": this.apiKey }),
       },
       options?.signal,
     );
 
-    // Handle authentication errors
-    if (rawResponse.errors) {
-      const hasAuthError = rawResponse.errors.some(
-        (error) =>
-          error.message?.includes("Unauthorized") ||
-          error.message?.includes("Invalid token") ||
-          error.message?.includes("NOT_AUTHORIZED_TO_ACCESS") ||
-          error.extensions?.code === "UNAUTHENTICATED",
-      );
-
-      if (hasAuthError) {
-        logger.warn(
-          "Authorization error detected",
-          this.sanitizeForLogging({
-            errors: rawResponse.errors,
-            hasRefreshToken: !!this.refreshToken,
-            isRefreshExpired: this.isRefreshTokenExpired(),
-          }),
-        );
-      }
-
-      if (hasAuthError && this.refreshToken && !this.isRefreshTokenExpired()) {
-        logger.info("Received auth error, attempting token refresh...");
-
-        const refreshResult = await this.refreshAccessToken();
-        if (refreshResult.success) {
-          // Retry the operation with the new token
-          rawResponse = await this.executeQuery(query, variables, { Authorization: `Bearer ${this.token}` }, options?.signal);
-        } else {
-          // If refresh failed, clear tokens
-          this.clearTokensAndRefreshState();
-        }
-      }
-    }
+    // Handle authentication errors with retry
+    rawResponse = await this.handleAuthErrorWithRetry(rawResponse, query, variables, options?.signal);
 
     logger.debug("Raw Response:", this.sanitizeForLogging(rawResponse));
 
@@ -654,7 +681,7 @@ class Crudify implements CrudifyPublicAPI {
     return this.adaptToPublicResponse(this.formatResponseInternal(rawResponse));
   }
 
-  private executeQuery = async (
+  private readonly executeQuery = async (
     query: string,
     variables: object = {},
     extraHeaders: { [key: string]: string } = {},
@@ -834,7 +861,7 @@ class Crudify implements CrudifyPublicAPI {
    * Check if access token needs renewal with dynamic buffer
    * @param urgencyLevel - 'critical' (30s), 'high' (2min), 'normal' (5min)
    */
-  private isTokenExpired = (urgencyLevel: "critical" | "high" | "normal" = "high"): boolean => {
+  private readonly isTokenExpired = (urgencyLevel: "critical" | "high" | "normal" = "high"): boolean => {
     if (!this.tokenExpiresAt) return false;
 
     const bufferTimes = {
@@ -850,7 +877,7 @@ class Crudify implements CrudifyPublicAPI {
   /**
    * Check if the refresh token is expired
    */
-  private isRefreshTokenExpired = (): boolean => {
+  private readonly isRefreshTokenExpired = (): boolean => {
     if (!this.refreshExpiresAt) return false;
     return Date.now() >= this.refreshExpiresAt;
   };
@@ -909,7 +936,7 @@ class Crudify implements CrudifyPublicAPI {
    * Validate if the access token is valid (JWT structure and expiration)
    * @private
    */
-  private isAccessTokenValid = (): boolean => {
+  private readonly isAccessTokenValid = (): boolean => {
     if (!this.token) return false;
 
     try {
@@ -971,7 +998,7 @@ class Crudify implements CrudifyPublicAPI {
   /**
    * Clear tokens and refresh state safely
    */
-  private clearTokensAndRefreshState = (): void => {
+  private readonly clearTokensAndRefreshState = (): void => {
     this.token = "";
     this.refreshToken = "";
     this.tokenExpiresAt = 0;

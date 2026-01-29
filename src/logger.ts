@@ -59,7 +59,7 @@ const LOG_LEVEL_PRIORITY: Record<CrudifyLogLevel, number> = {
 
 class Logger {
   private env: string;
-  private prefix: string;
+  private readonly prefix: string;
   private logLevel: CrudifyLogLevel = "none";
 
   constructor() {
@@ -107,26 +107,41 @@ class Logger {
   }
 
   /**
+   * Sanitize a single value based on its key
+   */
+  private sanitizeValue(key: string, value: unknown): unknown {
+    if (value === undefined || value === null) return undefined;
+
+    if (key === "userId" && typeof value === "string") {
+      return value.length > 8 ? `${value.substring(0, 8)}***` : value;
+    }
+
+    if (key === "email" && typeof value === "string") {
+      const [local, domain] = value.split("@");
+      return local && domain ? `${local.substring(0, 3)}***@${domain}` : "[REDACTED]";
+    }
+
+    if (typeof value === "string") {
+      return this.sanitize(value);
+    }
+
+    if (typeof value === "object" && value !== null) {
+      return this.sanitizeContext(value as LogContext);
+    }
+
+    return value;
+  }
+
+  /**
    * Sanitize context object
    */
   private sanitizeContext(context: LogContext): LogContext {
     const sanitized: LogContext = {};
 
     for (const [key, value] of Object.entries(context)) {
-      if (value === undefined || value === null) continue;
-
-      // Partial sanitization for user identifiers
-      if (key === "userId" && typeof value === "string") {
-        sanitized[key] = value.length > 8 ? `${value.substring(0, 8)}***` : value;
-      } else if (key === "email" && typeof value === "string") {
-        const [local, domain] = value.split("@");
-        sanitized[key] = local && domain ? `${local.substring(0, 3)}***@${domain}` : "[REDACTED]";
-      } else if (typeof value === "string") {
-        sanitized[key] = this.sanitize(value);
-      } else if (typeof value === "object" && value !== null) {
-        sanitized[key] = this.sanitizeContext(value as LogContext);
-      } else {
-        sanitized[key] = value;
+      const sanitizedValue = this.sanitizeValue(key, value);
+      if (sanitizedValue !== undefined) {
+        sanitized[key] = sanitizedValue;
       }
     }
 

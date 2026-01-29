@@ -2,17 +2,13 @@ import type { CrudifyLogLevel } from "./types";
 import { logger } from "./logger";
 
 // Detect if we're in a browser environment
-export const IS_BROWSER = typeof window !== "undefined" && typeof window.document !== "undefined";
+export const IS_BROWSER = globalThis.window?.document !== undefined;
 
 export const _fetch = async (url: globalThis.RequestInfo, options?: globalThis.RequestInit): Promise<globalThis.Response> => {
   const { dispatcher: _dispatcher, ...browserOptions } = (options || {}) as RequestInit & { dispatcher?: unknown };
 
-  // Use window.fetch in browser, globalThis.fetch in Node.js (v18+)
-  if (IS_BROWSER) {
-    return window.fetch(url, browserOptions);
-  } else {
-    return globalThis.fetch(url, browserOptions);
-  }
+  // Use globalThis.fetch in all environments (browser and Node.js v18+)
+  return globalThis.fetch(url, browserOptions);
 };
 
 export const shutdownNodeSpecifics = async (_logLevel?: CrudifyLogLevel): Promise<void> => {

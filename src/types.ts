@@ -64,8 +64,9 @@ export type CrudifyEnvType = "dev" | "stg" | "api" | "prod";
 
 /**
  * Represents a JSON string, typically used for data payloads in AWS services or GraphQL.
+ * @remarks This is intentionally a type alias for documentation purposes.
  */
-export type CrudifyAWSJSON = string;
+export type CrudifyAWSJSON = string; // NOSONAR - Semantic type alias for documentation
 
 /**
  * A type representing a structured object of field-level validation errors.
@@ -200,7 +201,7 @@ export type CrudifyRequestOptions = {
  * Represents a single operation within a transaction.
  */
 export interface TransactionOperation {
-  operation: "create" | "update" | "delete" | string;
+  operation: string;
   moduleKey?: string;
   data?: Record<string, unknown>;
   _id?: string;
