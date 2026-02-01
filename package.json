@@ -31,7 +31,8 @@
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run lint && npm run test",
     "ci": "npm run validate",
-    "sonar": "npm test && npx sonarqube-scanner -Dsonar.host.url=http://localhost:9000"
+    "sonar": "npm test && npx sonarqube-scanner -Dsonar.host.url=http://localhost:9000",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -74,6 +75,7 @@
     "@vitest/ui": "^3.2.4",
     "eslint": "^9.39.2",
     "happy-dom": "^19.0.2",
+    "husky": "^9.1.7",
     "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",

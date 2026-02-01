@@ -277,7 +277,7 @@ try {
     {},
     {
       signal: controller.signal,
-    }
+    },
   );
 } catch (error) {
   if (error.name === "AbortError") {

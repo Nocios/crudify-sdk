@@ -1,0 +1,72 @@
+#!/usr/bin/env sh
+
+# Pre-push hook: auto-bump patch version and push in one action
+
+# Skip if we're already in a hook-triggered push
+if [ "$HUSKY_SKIP_HOOKS" = "1" ]; then
+  exit 0
+fi
+
+# Get the current branch
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Function to sync with remote
+sync_with_remote() {
+  echo "Syncing with remote..."
+  git fetch origin "$BRANCH" 2>/dev/null
+  if git rev-parse "origin/$BRANCH" >/dev/null 2>&1; then
+    LOCAL=$(git rev-parse HEAD)
+    REMOTE=$(git rev-parse "origin/$BRANCH")
+    if [ "$LOCAL" != "$REMOTE" ]; then
+      git rebase "origin/$BRANCH" || {
+        echo "Rebase failed. Please resolve conflicts and try again."
+        return 1
+      }
+    fi
+  fi
+  return 0
+}
+
+# Check if the last commit is already a version bump
+LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+if echo "$LAST_COMMIT_MSG" | grep -q "^chore: bump version"; then
+  # Already bumped, sync and let the push proceed
+  sync_with_remote || exit 1
+  exit 0
+fi
+
+# Sync before version bump
+sync_with_remote || exit 1
+
+echo "Bumping patch version..."
+
+# Get current version
+CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+# Bump patch version without creating a git tag
+npm version patch --no-git-tag-version
+
+# Get new version
+NEW_VERSION=$(node -p "require('./package.json').version")
+
+# Stage the version changes
+git add package.json package-lock.json
+
+# Create commit with version bump
+git commit -m "chore: bump version to v$NEW_VERSION"
+
+echo ""
+echo "Version bumped: $CURRENT_VERSION -> $NEW_VERSION"
+echo "Pushing automatically..."
+
+# Sync again in case remote changed during checks
+sync_with_remote || exit 1
+
+# Push with hooks disabled to prevent recursion
+HUSKY_SKIP_HOOKS=1 git push origin "$BRANCH"
+
+echo ""
+echo "Push completed successfully!"
+
+# Exit 1 to abort the original push (we already pushed)
+exit 1
