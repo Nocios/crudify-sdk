@@ -3,19 +3,23 @@
 echo "Running pre-commit checks..."
 
 # 1. TypeCheck (mas rapido, detecta errores de tipos)
-echo "\n[1/4] Type checking..."
+echo "\n[1/5] Type checking..."
 npm run typecheck || exit 1
 
 # 2. Lint (rapido, detecta problemas de codigo)
-echo "\n[2/4] Linting..."
+echo "\n[2/5] Linting..."
 npm run lint || exit 1
 
 # 3. Tests con coverage
-echo "\n[3/4] Running tests..."
+echo "\n[3/5] Running tests..."
 npm run test:coverage || exit 1
 
 # 4. Build (valida que el bundle se genera)
-echo "\n[4/4] Building..."
+echo "\n[4/5] Building..."
 npm run build || exit 1
 
 echo "\nAll checks passed!"
+
+# 5. Sonar (no bloqueante, corre en background)
+echo "\n[5/5] Running sonar analysis (non-blocking)..."
+npm run sonar &
