@@ -178,7 +178,7 @@ const result = await crudify.login(
     rememberMe: true, // Extended session duration
     deviceName: "My Device", // Device identification
     signal: abortController.signal, // Request cancellation
-  }
+  },
 );
 ```
 
@@ -308,7 +308,7 @@ orders.data.items.forEach((order) => {
   console.log("Customer:", order.customerId?.name);
   console.log(
     "Products:",
-    order.productIds?.map((p) => p.name)
+    order.productIds?.map((p) => p.name),
   );
 });
 ```
@@ -463,7 +463,7 @@ try {
 const uploadUrl = await crudify.generateSignedUrl(
   "uploads/user-avatar.jpg", // File key
   "upload", // Operation: 'upload' or 'download'
-  3600 // Expires in 1 hour (optional)
+  3600, // Expires in 1 hour (optional)
 );
 
 // Upload file to S3
@@ -493,7 +493,7 @@ if (response.ok) {
 const downloadUrl = await crudify.generateSignedUrl(
   "uploads/user-avatar.jpg",
   "download",
-  300 // 5 minutes expiration
+  300, // 5 minutes expiration
 );
 
 // Create download link
