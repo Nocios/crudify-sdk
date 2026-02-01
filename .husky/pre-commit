@@ -20,6 +20,8 @@ npm run build || exit 1
 
 echo "\nAll checks passed!"
 
-# 5. Sonar (no bloqueante, corre en background)
+# 5. Sonar (no bloqueante - si falla, el commit continua)
 echo "\n[5/5] Running sonar analysis (non-blocking)..."
-npm run sonar &
+npm run sonar || echo "Sonar analysis failed, but commit will continue"
+
+echo "\nCommit ready!"
