@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Cargar variables de entorno (archivo simple, sin comandos)
+. ~/.zshenv 2>/dev/null
+
 echo "Running pre-commit checks..."
 
 # 1. TypeCheck (mas rapido, detecta errores de tipos)
