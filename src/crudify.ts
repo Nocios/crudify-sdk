@@ -313,7 +313,9 @@ class Crudify implements CrudifyPublicAPI {
     return issues.reduce(
       (acc, issue) => {
         const key = String(issue.path[0] ?? '_error');
-        if (!acc[key]) acc[key] = [];
+        if (!acc[key]) {
+          acc[key] = [];
+        }
         acc[key].push(issue.message);
         return acc;
       },
@@ -322,9 +324,13 @@ class Crudify implements CrudifyPublicAPI {
   };
 
   private readonly containsDangerousProperties = (obj: unknown, depth = 0): boolean => {
-    if (depth > 10) return false;
+    if (depth > 10) {
+      return false;
+    }
 
-    if (!obj || typeof obj !== 'object') return false;
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
 
     const dangerousKeys = new Set([
       '__proto__',
@@ -348,8 +354,11 @@ class Crudify implements CrudifyPublicAPI {
       }
 
       // Recursively check nested objects
-      if (record[key] && typeof record[key] === 'object')
-        if (this.containsDangerousProperties(record[key], depth + 1)) return true;
+      if (record[key] && typeof record[key] === 'object') {
+        if (this.containsDangerousProperties(record[key], depth + 1)) {
+          return true;
+        }
+      }
     }
 
     return false;
@@ -373,7 +382,9 @@ class Crudify implements CrudifyPublicAPI {
       return data;
     }
 
-    if (Array.isArray(data)) return data.map((item) => this.sanitizeForLogging(item));
+    if (Array.isArray(data)) {
+      return data.map((item) => this.sanitizeForLogging(item));
+    }
 
     const sanitized: Record<string, unknown> = {};
     const sensitiveKeys = [
@@ -399,10 +410,13 @@ class Crudify implements CrudifyPublicAPI {
       const keyLower = key.toLowerCase();
       const isSensitive = sensitiveKeys.some((sensitiveKey) => keyLower.includes(sensitiveKey));
 
-      if (isSensitive && typeof value === 'string' && value.length > 6)
+      if (isSensitive && typeof value === 'string' && value.length > 6) {
         sanitized[key] = value.substring(0, 6) + '******';
-      else if (value && typeof value === 'object') sanitized[key] = this.sanitizeForLogging(value);
-      else sanitized[key] = value;
+      } else if (value && typeof value === 'object') {
+        sanitized[key] = this.sanitizeForLogging(value);
+      } else {
+        sanitized[key] = value;
+      }
     }
 
     return sanitized;
@@ -452,8 +466,12 @@ class Crudify implements CrudifyPublicAPI {
 
     // Helper to safely stringify data without producing [object Object]
     const stringifyData = (data: unknown): string => {
-      if (typeof data === 'string') return data;
-      if (data === null || data === undefined) return '';
+      if (typeof data === 'string') {
+        return data;
+      }
+      if (data === null || data === undefined) {
+        return '';
+      }
       return JSON.stringify(data);
     };
 
@@ -521,8 +539,12 @@ class Crudify implements CrudifyPublicAPI {
         }
         // Helper to safely stringify value without producing [object Object]
         const stringifyValue = (value: unknown): string => {
-          if (value === null || value === undefined) return 'UNKNOWN_ERROR';
-          if (typeof value === 'string') return value;
+          if (value === null || value === undefined) {
+            return 'UNKNOWN_ERROR';
+          }
+          if (typeof value === 'string') {
+            return value;
+          }
           return JSON.stringify(value);
         };
         const finalErrors =
@@ -618,10 +640,14 @@ class Crudify implements CrudifyPublicAPI {
     variables: object,
     signal?: AbortSignal
   ): Promise<RawGraphQLResponse> => {
-    if (!rawResponse.errors) return rawResponse;
+    if (!rawResponse.errors) {
+      return rawResponse;
+    }
 
     const hasAuthError = this.isAuthError(rawResponse.errors);
-    if (!hasAuthError) return rawResponse;
+    if (!hasAuthError) {
+      return rawResponse;
+    }
 
     logger.warn(
       'Authorization error detected',
@@ -632,7 +658,9 @@ class Crudify implements CrudifyPublicAPI {
       })
     );
 
-    if (!this.refreshToken || this.isRefreshTokenExpired()) return rawResponse;
+    if (!this.refreshToken || this.isRefreshTokenExpired()) {
+      return rawResponse;
+    }
 
     logger.info('Received auth error, attempting token refresh...');
     const refreshResult = await this.refreshAccessToken();
@@ -650,7 +678,9 @@ class Crudify implements CrudifyPublicAPI {
     variables: object,
     options?: CrudifyRequestOptions
   ): Promise<CrudifyResponse> {
-    if (!this.endpoint || !this.apiKey) throw new Error('Crudify: Not initialized. Call init() first.');
+    if (!this.endpoint || !this.apiKey) {
+      throw new Error('Crudify: Not initialized. Call init() first.');
+    }
 
     // Auto-refresh tokens with critical buffer before important operation
     if (this.token && this.isTokenExpired('critical') && this.refreshToken && !this.isRefreshTokenExpired()) {
@@ -693,7 +723,9 @@ class Crudify implements CrudifyPublicAPI {
 
     logger.debug('Raw Response:', this.sanitizeForLogging(rawResponse));
 
-    if (this.responseInterceptor) rawResponse = await Promise.resolve(this.responseInterceptor(rawResponse));
+    if (this.responseInterceptor) {
+      rawResponse = await Promise.resolve(this.responseInterceptor(rawResponse));
+    }
 
     return this.adaptToPublicResponse(this.formatResponseInternal(rawResponse));
   }
@@ -703,7 +735,9 @@ class Crudify implements CrudifyPublicAPI {
     variables: object,
     options?: CrudifyRequestOptions
   ): Promise<CrudifyResponse> {
-    if (!this.endpoint || !this.apiKey) throw new Error('Crudify: Not initialized. Call init() first.');
+    if (!this.endpoint || !this.apiKey) {
+      throw new Error('Crudify: Not initialized. Call init() first.');
+    }
 
     let rawResponse: RawGraphQLResponse = await this.executeQuery(
       query,
@@ -714,7 +748,9 @@ class Crudify implements CrudifyPublicAPI {
 
     logger.debug('Raw Response:', this.sanitizeForLogging(rawResponse));
 
-    if (this.responseInterceptor) rawResponse = await Promise.resolve(this.responseInterceptor(rawResponse));
+    if (this.responseInterceptor) {
+      rawResponse = await Promise.resolve(this.responseInterceptor(rawResponse));
+    }
 
     return this.adaptToPublicResponse(this.formatResponseInternal(rawResponse));
   }
@@ -756,7 +792,9 @@ class Crudify implements CrudifyPublicAPI {
   };
 
   public login = async (identifier: string, password: string): Promise<CrudifyResponse> => {
-    if (!this.endpoint || !this.apiKey) throw new Error('Crudify: Not initialized. Call init() first.');
+    if (!this.endpoint || !this.apiKey) {
+      throw new Error('Crudify: Not initialized. Call init() first.');
+    }
 
     const email: string | undefined = identifier.includes('@') ? identifier : undefined;
     const username: string | undefined = identifier.includes('@') ? undefined : identifier;
@@ -814,9 +852,13 @@ class Crudify implements CrudifyPublicAPI {
     }
 
     // Initial validations
-    if (!this.refreshToken) return { success: false, errors: { _refresh: ['NO_REFRESH_TOKEN_AVAILABLE'] } };
+    if (!this.refreshToken) {
+      return { success: false, errors: { _refresh: ['NO_REFRESH_TOKEN_AVAILABLE'] } };
+    }
 
-    if (!this.endpoint || !this.apiKey) throw new Error('Crudify: Not initialized. Call init() first.');
+    if (!this.endpoint || !this.apiKey) {
+      throw new Error('Crudify: Not initialized. Call init() first.');
+    }
 
     // If token is not actually expired, do nothing
     if (!this.isTokenExpired()) {
@@ -908,7 +950,9 @@ class Crudify implements CrudifyPublicAPI {
    * @param urgencyLevel - 'critical' (30s), 'high' (2min), 'normal' (5min)
    */
   private readonly isTokenExpired = (urgencyLevel: 'critical' | 'high' | 'normal' = 'high'): boolean => {
-    if (!this.tokenExpiresAt) return false;
+    if (!this.tokenExpiresAt) {
+      return false;
+    }
 
     const bufferTimes = {
       critical: 30 * 1000, // 30 seconds - for critical operations
@@ -924,12 +968,16 @@ class Crudify implements CrudifyPublicAPI {
    * Check if the refresh token is expired
    */
   private readonly isRefreshTokenExpired = (): boolean => {
-    if (!this.refreshExpiresAt) return false;
+    if (!this.refreshExpiresAt) {
+      return false;
+    }
     return Date.now() >= this.refreshExpiresAt;
   };
 
   public setToken = (token: string): void => {
-    if (typeof token === 'string' && token) this.token = token;
+    if (typeof token === 'string' && token) {
+      this.token = token;
+    }
   };
 
   /**
@@ -938,10 +986,18 @@ class Crudify implements CrudifyPublicAPI {
    */
   public setTokens = (tokens: CrudifyTokenConfig): void => {
     // First, set all fields temporarily
-    if (tokens.accessToken) this.token = tokens.accessToken;
-    if (tokens.refreshToken) this.refreshToken = tokens.refreshToken;
-    if (tokens.expiresAt) this.tokenExpiresAt = tokens.expiresAt;
-    if (tokens.refreshExpiresAt) this.refreshExpiresAt = tokens.refreshExpiresAt;
+    if (tokens.accessToken) {
+      this.token = tokens.accessToken;
+    }
+    if (tokens.refreshToken) {
+      this.refreshToken = tokens.refreshToken;
+    }
+    if (tokens.expiresAt) {
+      this.tokenExpiresAt = tokens.expiresAt;
+    }
+    if (tokens.refreshExpiresAt) {
+      this.refreshExpiresAt = tokens.refreshExpiresAt;
+    }
 
     // Validate the access token after setting it
     if (this.token && !this.isAccessTokenValid()) {
@@ -983,7 +1039,9 @@ class Crudify implements CrudifyPublicAPI {
    * @private
    */
   private readonly isAccessTokenValid = (): boolean => {
-    if (!this.token) return false;
+    if (!this.token) {
+      return false;
+    }
 
     try {
       // Decode JWT without verifying signature (to avoid depending on secret in client)
@@ -1107,7 +1165,9 @@ class Crudify implements CrudifyPublicAPI {
     data: { fileName: string; contentType: string; visibility?: 'public' | 'private' },
     options?: CrudifyRequestOptions
   ): Promise<CrudifyResponse> => {
-    if (!this.endpoint || !this.token) throw new Error('Crudify: Not initialized. Call init() first.');
+    if (!this.endpoint || !this.token) {
+      throw new Error('Crudify: Not initialized. Call init() first.');
+    }
 
     // Ensure visibility has a default value
     const requestData = {
@@ -1222,7 +1282,9 @@ class Crudify implements CrudifyPublicAPI {
   };
 
   public static getInstance(): Crudify {
-    if (!Crudify.instance) Crudify.instance = new Crudify();
+    if (!Crudify.instance) {
+      Crudify.instance = new Crudify();
+    }
     return Crudify.instance;
   }
 

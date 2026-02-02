@@ -26,6 +26,8 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { allowSingleLine: false }],
       'no-console': 'warn',
       'no-restricted-syntax': [
         'error',

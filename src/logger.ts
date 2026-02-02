@@ -89,7 +89,9 @@ class Logger {
    * Check if a specific log level should be logged based on configured level
    */
   private isLevelEnabled(level: LogLevel): boolean {
-    if (this.logLevel === 'none') return false;
+    if (this.logLevel === 'none') {
+      return false;
+    }
     const levelPriority = LOG_LEVEL_PRIORITY[level];
     const configuredPriority = LOG_LEVEL_PRIORITY[this.logLevel];
     return levelPriority <= configuredPriority;
@@ -110,7 +112,9 @@ class Logger {
    * Sanitize a single value based on its key
    */
   private sanitizeValue(key: string, value: unknown): unknown {
-    if (value === undefined || value === null) return undefined;
+    if (value === undefined || value === null) {
+      return undefined;
+    }
 
     if (key === 'userId' && typeof value === 'string') {
       return value.length > 8 ? `${value.substring(0, 8)}***` : value;
@@ -172,7 +176,9 @@ class Logger {
    * Format and output log entry
    */
   private log(level: LogLevel, message: string, context?: LogContext): void {
-    if (!this.shouldLog(level)) return;
+    if (!this.shouldLog(level)) {
+      return;
+    }
 
     const sanitizedMessage = this.sanitize(message);
     const sanitizedContext = context ? this.sanitizeContext(context) : undefined;
@@ -210,7 +216,9 @@ class Logger {
    * Convert any value to LogContext for logging
    */
   private toLogContext(...args: unknown[]): LogContext | undefined {
-    if (args.length === 0) return undefined;
+    if (args.length === 0) {
+      return undefined;
+    }
 
     // Single Error argument
     if (args.length === 1 && args[0] instanceof Error) {
