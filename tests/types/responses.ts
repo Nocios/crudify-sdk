@@ -15,7 +15,7 @@ export interface UserResponseData {
 }
 
 export interface LoginResponseData {
-  loginStatus: "successful";
+  loginStatus: 'successful';
   token: string;
   refreshToken: string;
   expiresAt: number;

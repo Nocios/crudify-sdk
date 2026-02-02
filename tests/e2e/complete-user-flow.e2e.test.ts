@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { CrudifyInstance } from "../../src/crudify";
-import type { CrudifyResponse } from "../../src/types";
-import { resetCrudifyState } from "../helpers/testUtils";
-import type { PermissionsResponseData, UserResponseData, SignedUrlResponseData, StructureResponseData } from "../types/responses";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { CrudifyInstance } from '../../src/crudify';
+import type { CrudifyResponse } from '../../src/types';
+import { resetCrudifyState } from '../helpers/testUtils';
+import type {
+  PermissionsResponseData,
+  UserResponseData,
+  SignedUrlResponseData,
+  StructureResponseData,
+} from '../types/responses';
 
-describe("E2E: Complete User Flow", () => {
+describe('E2E: Complete User Flow', () => {
   let originalFetch: typeof globalThis.fetch;
   let fetchMock: any;
 
@@ -20,20 +25,20 @@ describe("E2E: Complete User Flow", () => {
     resetCrudifyState();
   });
 
-  it("should complete full application flow: init, login, CRUD operations, logout", async () => {
+  it('should complete full application flow: init, login, CRUD operations, logout', async () => {
     // Step 1: Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Step 2: Login
     const mockToken = createMockToken(3600);
@@ -41,10 +46,10 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: mockToken,
-              refreshToken: "refresh-token",
+              refreshToken: 'refresh-token',
               expiresIn: 900,
             }),
           },
@@ -52,7 +57,7 @@ describe("E2E: Complete User Flow", () => {
       }),
     });
 
-    const loginResult = await CrudifyInstance.login("user@example.com", "password123");
+    const loginResult = await CrudifyInstance.login('user@example.com', 'password123');
     expect(loginResult.success).toBe(true);
 
     // Step 3: Get permissions
@@ -60,10 +65,10 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
-              modules: ["users", "posts"],
-              actions: ["read", "write"],
+              modules: ['users', 'posts'],
+              actions: ['read', 'write'],
             }),
           },
         },
@@ -72,78 +77,80 @@ describe("E2E: Complete User Flow", () => {
 
     const permissionsResult = (await CrudifyInstance.getPermissions()) as CrudifyResponse<PermissionsResponseData>;
     expect(permissionsResult.success).toBe(true);
-    expect(permissionsResult.data?.modules).toContain("users");
+    expect(permissionsResult.data?.modules).toContain('users');
 
     // Step 4: Create item
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "user123", name: "John Doe", email: "john@example.com" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: 'user123', name: 'John Doe', email: 'john@example.com' }),
           },
         },
       }),
     });
 
-    const createResult = (await CrudifyInstance.createItem("users", {
-      name: "John Doe",
-      email: "john@example.com",
+    const createResult = (await CrudifyInstance.createItem('users', {
+      name: 'John Doe',
+      email: 'john@example.com',
     })) as CrudifyResponse<UserResponseData>;
     expect(createResult.success).toBe(true);
-    expect(createResult.data?._id).toBe("user123");
+    expect(createResult.data?._id).toBe('user123');
 
     // Step 5: Read item
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "user123", name: "John Doe", email: "john@example.com" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: 'user123', name: 'John Doe', email: 'john@example.com' }),
           },
         },
       }),
     });
 
-    const readResult = (await CrudifyInstance.readItem("users", { _id: "user123" })) as CrudifyResponse<UserResponseData>;
+    const readResult = (await CrudifyInstance.readItem('users', {
+      _id: 'user123',
+    })) as CrudifyResponse<UserResponseData>;
     expect(readResult.success).toBe(true);
-    expect(readResult.data?.name).toBe("John Doe");
+    expect(readResult.data?.name).toBe('John Doe');
 
     // Step 6: Update item
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "user123", name: "John Smith", email: "john@example.com" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: 'user123', name: 'John Smith', email: 'john@example.com' }),
           },
         },
       }),
     });
 
-    const updateResult = (await CrudifyInstance.updateItem("users", {
-      _id: "user123",
-      name: "John Smith",
+    const updateResult = (await CrudifyInstance.updateItem('users', {
+      _id: 'user123',
+      name: 'John Smith',
     })) as CrudifyResponse<UserResponseData>;
     expect(updateResult.success).toBe(true);
-    expect(updateResult.data?.name).toBe("John Smith");
+    expect(updateResult.data?.name).toBe('John Smith');
 
     // Step 7: Read items (list)
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify([
-              { _id: "user123", name: "John Smith" },
-              { _id: "user456", name: "Jane Doe" },
+              { _id: 'user123', name: 'John Smith' },
+              { _id: 'user456', name: 'Jane Doe' },
             ]),
           },
         },
       }),
     });
 
-    const listResult = await CrudifyInstance.readItems("users", {});
+    const listResult = await CrudifyInstance.readItems('users', {});
     expect(listResult.success).toBe(true);
     expect(listResult.data).toHaveLength(2);
 
@@ -152,14 +159,14 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({ deleted: true }),
           },
         },
       }),
     });
 
-    const deleteResult = await CrudifyInstance.deleteItem("users", "user123");
+    const deleteResult = await CrudifyInstance.deleteItem('users', 'user123');
     expect(deleteResult.success).toBe(true);
 
     // Step 9: Logout
@@ -168,7 +175,7 @@ describe("E2E: Complete User Flow", () => {
     expect(CrudifyInstance.isLogin()).toBe(false);
   });
 
-  it("should handle transaction with multiple operations", async () => {
+  it('should handle transaction with multiple operations', async () => {
     // Initialize and login
     await initializeAndLogin(fetchMock);
 
@@ -177,22 +184,22 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify([
               {
-                action: "create",
-                status: "OK",
-                data: { _id: "user1", name: "User 1" },
+                action: 'create',
+                status: 'OK',
+                data: { _id: 'user1', name: 'User 1' },
               },
               {
-                action: "create",
-                status: "OK",
-                data: { _id: "user2", name: "User 2" },
+                action: 'create',
+                status: 'OK',
+                data: { _id: 'user2', name: 'User 2' },
               },
               {
-                action: "update",
-                status: "OK",
-                data: { _id: "user3", name: "Updated User" },
+                action: 'update',
+                status: 'OK',
+                data: { _id: 'user3', name: 'Updated User' },
               },
             ]),
           },
@@ -202,9 +209,9 @@ describe("E2E: Complete User Flow", () => {
 
     const transactionResult = await CrudifyInstance.transaction({
       operations: [
-        { action: "create", moduleKey: "users", data: { name: "User 1" } },
-        { action: "create", moduleKey: "users", data: { name: "User 2" } },
-        { action: "update", moduleKey: "users", data: { _id: "user3", name: "Updated User" } },
+        { action: 'create', moduleKey: 'users', data: { name: 'User 1' } },
+        { action: 'create', moduleKey: 'users', data: { name: 'User 2' } },
+        { action: 'update', moduleKey: 'users', data: { _id: 'user3', name: 'Updated User' } },
       ],
     });
 
@@ -212,7 +219,7 @@ describe("E2E: Complete User Flow", () => {
     expect(transactionResult.data).toHaveLength(3);
   });
 
-  it("should handle response interceptor in full flow", async () => {
+  it('should handle response interceptor in full flow', async () => {
     const interceptedResponses: any[] = [];
 
     // Set response interceptor
@@ -229,31 +236,31 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "123", name: "Test" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: '123', name: 'Test' }),
           },
         },
       }),
     });
 
-    await CrudifyInstance.readItem("users", { _id: "123" });
+    await CrudifyInstance.readItem('users', { _id: '123' });
 
     // Verify interceptor was called
     expect(interceptedResponses.length).toBeGreaterThan(0);
   });
 
-  it("should handle file upload flow with signed URL", async () => {
+  it('should handle file upload flow with signed URL', async () => {
     // Initialize and login
     await initializeAndLogin(fetchMock);
 
     // Generate signed URL
-    const mockSignedUrl = "https://s3.amazonaws.com/bucket/file.jpg?signature=xyz";
+    const mockSignedUrl = 'https://s3.amazonaws.com/bucket/file.jpg?signature=xyz';
 
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({ url: mockSignedUrl }),
           },
         },
@@ -261,8 +268,8 @@ describe("E2E: Complete User Flow", () => {
     });
 
     const signedUrlResult = (await CrudifyInstance.generateSignedUrl({
-      fileName: "profile.jpg",
-      contentType: "image/jpeg",
+      fileName: 'profile.jpg',
+      contentType: 'image/jpeg',
     })) as CrudifyResponse<SignedUrlResponseData>;
 
     expect(signedUrlResult.success).toBe(true);
@@ -276,27 +283,27 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
-              _id: "user123",
-              name: "John",
-              profileImage: mockSignedUrl.split("?")[0],
+              _id: 'user123',
+              name: 'John',
+              profileImage: mockSignedUrl.split('?')[0],
             }),
           },
         },
       }),
     });
 
-    const createUserResult = (await CrudifyInstance.createItem("users", {
-      name: "John",
-      profileImage: mockSignedUrl.split("?")[0],
+    const createUserResult = (await CrudifyInstance.createItem('users', {
+      name: 'John',
+      profileImage: mockSignedUrl.split('?')[0],
     })) as CrudifyResponse<UserResponseData>;
 
     expect(createUserResult.success).toBe(true);
     expect(createUserResult.data?.profileImage).toBeDefined();
   });
 
-  it("should handle abort signal to cancel requests", async () => {
+  it('should handle abort signal to cancel requests', async () => {
     // Initialize and login
     await initializeAndLogin(fetchMock);
 
@@ -311,7 +318,7 @@ describe("E2E: Complete User Flow", () => {
     fetchMock.mockImplementationOnce(() => slowRequest);
 
     // Start request
-    const requestPromise = CrudifyInstance.readItem("users", { _id: "123" }, { signal: controller.signal });
+    const requestPromise = CrudifyInstance.readItem('users', { _id: '123' }, { signal: controller.signal });
 
     // Abort after 10ms
     setTimeout(() => {
@@ -324,8 +331,8 @@ describe("E2E: Complete User Flow", () => {
         json: async () => ({
           data: {
             response: {
-              status: "OK",
-              data: JSON.stringify({ _id: "123" }),
+              status: 'OK',
+              data: JSON.stringify({ _id: '123' }),
             },
           },
         }),
@@ -345,34 +352,34 @@ describe("E2E: Complete User Flow", () => {
       expect.any(String),
       expect.objectContaining({
         signal: controller.signal,
-      }),
+      })
     );
   });
 
-  it("should handle public API operations without authentication", async () => {
+  it('should handle public API operations without authentication', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Get public structure (no auth required)
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               modules: {
-                posts: { fields: { title: { type: "string" } } },
+                posts: { fields: { title: { type: 'string' } } },
               },
             }),
           },
@@ -389,15 +396,15 @@ describe("E2E: Complete User Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "post123", title: "Public Post" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: 'post123', title: 'Public Post' }),
           },
         },
       }),
     });
 
-    const createResult = await CrudifyInstance.createItemPublic("posts", {
-      title: "Public Post",
+    const createResult = await CrudifyInstance.createItemPublic('posts', {
+      title: 'Public Post',
     });
 
     expect(createResult.success).toBe(true);
@@ -409,9 +416,9 @@ describe("E2E: Complete User Flow", () => {
 function createMockToken(expiresInSeconds: number): string {
   const futureTime = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const payload = {
-    sub: "user123",
+    sub: 'user123',
     exp: futureTime,
-    type: "access",
+    type: 'access',
     iat: Math.floor(Date.now() / 1000),
   };
   return `header.${btoa(JSON.stringify(payload))}.signature`;
@@ -423,14 +430,14 @@ async function initializeAndLogin(fetchMock: any): Promise<void> {
     json: async () => ({
       data: {
         response: {
-          apiEndpoint: "https://api.test.com/graphql",
-          apiKeyEndpoint: "test-key",
+          apiEndpoint: 'https://api.test.com/graphql',
+          apiKeyEndpoint: 'test-key',
         },
       },
     }),
   });
 
-  await CrudifyInstance.init("public-api-key");
+  await CrudifyInstance.init('public-api-key');
 
   // Login
   const mockToken = createMockToken(3600);
@@ -438,10 +445,10 @@ async function initializeAndLogin(fetchMock: any): Promise<void> {
     json: async () => ({
       data: {
         response: {
-          status: "OK",
+          status: 'OK',
           data: JSON.stringify({
             token: mockToken,
-            refreshToken: "refresh-token",
+            refreshToken: 'refresh-token',
             expiresIn: 900,
           }),
         },
@@ -449,5 +456,5 @@ async function initializeAndLogin(fetchMock: any): Promise<void> {
     }),
   });
 
-  await CrudifyInstance.login("user@example.com", "password123");
+  await CrudifyInstance.login('user@example.com', 'password123');
 }

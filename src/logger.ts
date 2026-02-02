@@ -20,8 +20,8 @@
  *   logger.debug('Processing request', { payload: data });
  */
 
-export type LogLevel = "error" | "warn" | "info" | "debug";
-export type CrudifyLogLevel = "none" | "debug" | "info" | "warn" | "error";
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug';
+export type CrudifyLogLevel = 'none' | 'debug' | 'info' | 'warn' | 'error';
 
 export interface LogContext {
   [key: string]: unknown;
@@ -45,8 +45,8 @@ const SENSITIVE_PATTERNS = [
 // Logger Class
 // ============================================
 // Default to "prod" - parent app must call setEnvironment() to enable verbose logging
-let ENVIRONMENT = "prod";
-const PREFIX = "CrudifyCore";
+let ENVIRONMENT = 'prod';
+const PREFIX = 'CrudifyCore';
 
 // Log level hierarchy (none = disabled)
 const LOG_LEVEL_PRIORITY: Record<CrudifyLogLevel, number> = {
@@ -60,7 +60,7 @@ const LOG_LEVEL_PRIORITY: Record<CrudifyLogLevel, number> = {
 class Logger {
   private env: string;
   private readonly prefix: string;
-  private logLevel: CrudifyLogLevel = "none";
+  private logLevel: CrudifyLogLevel = 'none';
 
   constructor() {
     this.env = ENVIRONMENT;
@@ -89,7 +89,7 @@ class Logger {
    * Check if a specific log level should be logged based on configured level
    */
   private isLevelEnabled(level: LogLevel): boolean {
-    if (this.logLevel === "none") return false;
+    if (this.logLevel === 'none') return false;
     const levelPriority = LOG_LEVEL_PRIORITY[level];
     const configuredPriority = LOG_LEVEL_PRIORITY[this.logLevel];
     return levelPriority <= configuredPriority;
@@ -101,7 +101,7 @@ class Logger {
   private sanitize(str: string): string {
     let sanitized = str;
     for (const pattern of SENSITIVE_PATTERNS) {
-      sanitized = sanitized.replace(pattern, "[REDACTED]");
+      sanitized = sanitized.replace(pattern, '[REDACTED]');
     }
     return sanitized;
   }
@@ -112,20 +112,20 @@ class Logger {
   private sanitizeValue(key: string, value: unknown): unknown {
     if (value === undefined || value === null) return undefined;
 
-    if (key === "userId" && typeof value === "string") {
+    if (key === 'userId' && typeof value === 'string') {
       return value.length > 8 ? `${value.substring(0, 8)}***` : value;
     }
 
-    if (key === "email" && typeof value === "string") {
-      const [local, domain] = value.split("@");
-      return local && domain ? `${local.substring(0, 3)}***@${domain}` : "[REDACTED]";
+    if (key === 'email' && typeof value === 'string') {
+      const [local, domain] = value.split('@');
+      return local && domain ? `${local.substring(0, 3)}***@${domain}` : '[REDACTED]';
     }
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       return this.sanitize(value);
     }
 
-    if (typeof value === "object" && value !== null) {
+    if (typeof value === 'object' && value !== null) {
       return this.sanitizeContext(value as LogContext);
     }
 
@@ -155,13 +155,13 @@ class Logger {
    */
   private shouldLog(level: LogLevel): boolean {
     // If logLevel is set, use it
-    if (this.logLevel !== "none") {
+    if (this.logLevel !== 'none') {
       return this.isLevelEnabled(level);
     }
 
     // Fallback to environment-based logging
-    const isProduction = this.env === "prod" || this.env === "production" || this.env === "api";
-    if (isProduction && level !== "error") {
+    const isProduction = this.env === 'prod' || this.env === 'production' || this.env === 'api';
+    if (isProduction && level !== 'error') {
       return false;
     }
 
@@ -190,16 +190,16 @@ class Logger {
 
     /* eslint-disable no-console */
     switch (level) {
-      case "error":
+      case 'error':
         console.error(output);
         break;
-      case "warn":
+      case 'warn':
         console.warn(output);
         break;
-      case "info":
+      case 'info':
         console.info(output);
         break;
-      case "debug":
+      case 'debug':
         console.log(output);
         break;
     }
@@ -223,7 +223,7 @@ class Logger {
     }
 
     // Single LogContext object
-    if (args.length === 1 && typeof args[0] === "object" && args[0] !== null && !(args[0] instanceof Error)) {
+    if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null && !(args[0] instanceof Error)) {
       return args[0] as LogContext;
     }
 
@@ -240,28 +240,28 @@ class Logger {
    * Log an error - Always logged in all environments
    */
   error(message: string, ...args: unknown[]): void {
-    this.log("error", message, this.toLogContext(...args));
+    this.log('error', message, this.toLogContext(...args));
   }
 
   /**
    * Log a warning - Only in dev/stg
    */
   warn(message: string, ...args: unknown[]): void {
-    this.log("warn", message, this.toLogContext(...args));
+    this.log('warn', message, this.toLogContext(...args));
   }
 
   /**
    * Log info - Only in dev/stg
    */
   info(message: string, ...args: unknown[]): void {
-    this.log("info", message, this.toLogContext(...args));
+    this.log('info', message, this.toLogContext(...args));
   }
 
   /**
    * Log debug information - Only in dev/stg
    */
   debug(message: string, ...args: unknown[]): void {
-    this.log("debug", message, this.toLogContext(...args));
+    this.log('debug', message, this.toLogContext(...args));
   }
 
   /**

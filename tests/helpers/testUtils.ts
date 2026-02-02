@@ -3,7 +3,7 @@
  * Provides helper functions for testing Crudify SDK
  */
 
-import { CrudifyInstance } from "../../src/crudify";
+import { CrudifyInstance } from '../../src/crudify';
 
 /**
  * Reset Crudify singleton state completely between tests
@@ -13,18 +13,18 @@ export function resetCrudifyState(): void {
   const instance = CrudifyInstance as any;
 
   // Reset authentication state
-  instance.token = "";
-  instance.refreshToken = "";
+  instance.token = '';
+  instance.refreshToken = '';
   instance.tokenExpiresAt = 0;
   instance.refreshExpiresAt = 0;
 
   // Reset configuration
-  instance.endpoint = "";
-  instance.apiKey = "";
-  instance.publicApiKey = "";
-  instance.logLevel = "none";
-  instance.apiEndpointAdmin = "";
-  instance.apiKeyEndpointAdmin = "";
+  instance.endpoint = '';
+  instance.apiKey = '';
+  instance.publicApiKey = '';
+  instance.logLevel = 'none';
+  instance.apiEndpointAdmin = '';
+  instance.apiKeyEndpointAdmin = '';
 
   // Reset interceptors and callbacks
   instance.responseInterceptor = null;
@@ -47,20 +47,20 @@ export function resetCrudifyState(): void {
  * @returns Base64-encoded JWT token
  */
 export function createMockJWT(payload: Record<string, any>, expiresIn: number = 3600): string {
-  const header = { alg: "HS256", typ: "JWT" };
+  const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
 
   const fullPayload = {
-    sub: payload.sub || "user123",
+    sub: payload.sub || 'user123',
     exp: now + expiresIn,
     iat: now,
-    type: "access",
+    type: 'access',
     ...payload,
   };
 
   const encodedHeader = btoa(JSON.stringify(header));
   const encodedPayload = btoa(JSON.stringify(fullPayload));
-  const signature = "mock-signature";
+  const signature = 'mock-signature';
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
@@ -78,15 +78,18 @@ export function createExpiredJWT(payload: Record<string, any> = {}, expiredBySec
 /**
  * Mock fetch response for successful init
  */
-export function mockInitSuccess(endpoint: string = "https://api.test.com/graphql", apiKey: string = "test-endpoint-key") {
+export function mockInitSuccess(
+  endpoint: string = 'https://api.test.com/graphql',
+  apiKey: string = 'test-endpoint-key'
+) {
   return {
     json: async () => ({
       data: {
         response: {
           apiEndpoint: endpoint,
           apiKeyEndpoint: apiKey,
-          apiEndpointAdmin: endpoint.replace("/graphql", "/admin"),
-          apiKeyEndpointAdmin: apiKey + "-admin",
+          apiEndpointAdmin: endpoint.replace('/graphql', '/admin'),
+          apiKeyEndpointAdmin: apiKey + '-admin',
         },
       },
     }),
@@ -96,7 +99,7 @@ export function mockInitSuccess(endpoint: string = "https://api.test.com/graphql
 /**
  * Mock fetch response for failed init
  */
-export function mockInitFailure(errorMessage: string = "Invalid API key") {
+export function mockInitFailure(errorMessage: string = 'Invalid API key') {
   return {
     json: async () => ({
       errors: [{ message: errorMessage }],
@@ -107,21 +110,26 @@ export function mockInitFailure(errorMessage: string = "Invalid API key") {
 /**
  * Mock fetch response for successful login
  */
-export function mockLoginSuccess(token?: string, refreshToken?: string, expiresIn: number = 900, refreshExpiresIn: number = 604800) {
-  const mockToken = token || createMockJWT({ username: "testuser" });
-  const mockRefreshToken = refreshToken || "refresh-token-123";
+export function mockLoginSuccess(
+  token?: string,
+  refreshToken?: string,
+  expiresIn: number = 900,
+  refreshExpiresIn: number = 604800
+) {
+  const mockToken = token || createMockJWT({ username: 'testuser' });
+  const mockRefreshToken = refreshToken || 'refresh-token-123';
 
   return {
     json: async () => ({
       data: {
         response: {
-          status: "OK",
+          status: 'OK',
           data: JSON.stringify({
             token: mockToken,
             refreshToken: mockRefreshToken,
             expiresIn,
             refreshExpiresIn,
-            version: "1.0.0",
+            version: '1.0.0',
           }),
         },
       },
@@ -137,7 +145,7 @@ export function mockLoginFieldError(errors: Array<{ path: string[]; message: str
     json: async () => ({
       data: {
         response: {
-          status: "FIELD_ERROR",
+          status: 'FIELD_ERROR',
           data: JSON.stringify(errors),
         },
       },
@@ -148,12 +156,12 @@ export function mockLoginFieldError(errors: Array<{ path: string[]; message: str
 /**
  * Mock fetch response for general error
  */
-export function mockError(errorMessage: string = "UNKNOWN_ERROR") {
+export function mockError(errorMessage: string = 'UNKNOWN_ERROR') {
   return {
     json: async () => ({
       data: {
         response: {
-          status: "ERROR",
+          status: 'ERROR',
           data: JSON.stringify({ message: errorMessage }),
         },
       },
@@ -165,14 +173,14 @@ export function mockError(errorMessage: string = "UNKNOWN_ERROR") {
  * Mock fetch response for successful refresh token
  */
 export function mockRefreshSuccess(newToken?: string, newRefreshToken?: string, expiresIn: number = 900) {
-  const mockNewToken = newToken || createMockJWT({ username: "testuser" });
-  const mockNewRefreshToken = newRefreshToken || "new-refresh-token";
+  const mockNewToken = newToken || createMockJWT({ username: 'testuser' });
+  const mockNewRefreshToken = newRefreshToken || 'new-refresh-token';
 
   return {
     json: async () => ({
       data: {
         response: {
-          status: "OK",
+          status: 'OK',
           data: JSON.stringify({
             token: mockNewToken,
             refreshToken: mockNewRefreshToken,
@@ -193,7 +201,7 @@ export function mockCrudSuccess(data: any) {
     json: async () => ({
       data: {
         response: {
-          status: "OK",
+          status: 'OK',
           data: JSON.stringify(data),
         },
       },
@@ -209,8 +217,8 @@ export function mockUnauthorizedError() {
     json: async () => ({
       errors: [
         {
-          message: "Unauthorized: Invalid token",
-          extensions: { code: "UNAUTHENTICATED" },
+          message: 'Unauthorized: Invalid token',
+          extensions: { code: 'UNAUTHENTICATED' },
         },
       ],
     }),

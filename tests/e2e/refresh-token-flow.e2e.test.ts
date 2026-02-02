@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { CrudifyInstance } from "../../src/crudify";
-import { resetCrudifyState } from "../helpers/testUtils";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { CrudifyInstance } from '../../src/crudify';
+import { resetCrudifyState } from '../helpers/testUtils';
 
-describe("E2E: Refresh Token Flow", () => {
+describe('E2E: Refresh Token Flow', () => {
   let originalFetch: typeof globalThis.fetch;
   let fetchMock: any;
 
@@ -18,25 +18,25 @@ describe("E2E: Refresh Token Flow", () => {
     resetCrudifyState();
   });
 
-  it("should auto-refresh token when expired before CRUD operation", async () => {
+  it('should auto-refresh token when expired before CRUD operation', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Set expired token
     const expiredToken = createMockToken(-60); // Expired 1 minute ago
     (CrudifyInstance as any).token = expiredToken;
-    (CrudifyInstance as any).refreshToken = "valid-refresh-token";
+    (CrudifyInstance as any).refreshToken = 'valid-refresh-token';
     (CrudifyInstance as any).tokenExpiresAt = Date.now() - 60000;
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
@@ -46,10 +46,10 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: newToken,
-              refreshToken: "new-refresh-token",
+              refreshToken: 'new-refresh-token',
               expiresIn: 900,
               refreshExpiresIn: 604800,
             }),
@@ -63,43 +63,43 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "123", name: "Test User" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: '123', name: 'Test User' }),
           },
         },
       }),
     });
 
     // Perform CRUD operation - should auto-refresh first
-    const result = await CrudifyInstance.readItem("users", { _id: "123" });
+    const result = await CrudifyInstance.readItem('users', { _id: '123' });
 
     expect(result.success).toBe(true);
-    expect(result.data).toEqual({ _id: "123", name: "Test User" });
+    expect(result.data).toEqual({ _id: '123', name: 'Test User' });
 
     // Verify token was refreshed
     const tokenData = CrudifyInstance.getTokenData();
     expect(tokenData.accessToken).toBe(newToken);
-    expect(tokenData.refreshToken).toBe("new-refresh-token");
+    expect(tokenData.refreshToken).toBe('new-refresh-token');
   });
 
-  it("should retry operation after receiving 401 and refreshing token", async () => {
+  it('should retry operation after receiving 401 and refreshing token', async () => {
     // Initialize and set token
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     const token = createMockToken(3600);
     (CrudifyInstance as any).token = token;
-    (CrudifyInstance as any).refreshToken = "valid-refresh-token";
+    (CrudifyInstance as any).refreshToken = 'valid-refresh-token';
     (CrudifyInstance as any).tokenExpiresAt = Date.now() + 3600000;
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
@@ -108,8 +108,8 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         errors: [
           {
-            message: "Unauthorized",
-            extensions: { code: "UNAUTHENTICATED" },
+            message: 'Unauthorized',
+            extensions: { code: 'UNAUTHENTICATED' },
           },
         ],
       }),
@@ -121,10 +121,10 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: newToken,
-              refreshToken: "new-refresh-token",
+              refreshToken: 'new-refresh-token',
               expiresIn: 900,
             }),
           },
@@ -137,39 +137,39 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "123", name: "Test User" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: '123', name: 'Test User' }),
           },
         },
       }),
     });
 
-    const result = await CrudifyInstance.readItem("users", { _id: "123" });
+    const result = await CrudifyInstance.readItem('users', { _id: '123' });
 
     expect(result.success).toBe(true);
     // Should make: init + failed request + refresh + retry
     expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("should clear tokens when refresh token fails", async () => {
+  it('should clear tokens when refresh token fails', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Set expired token
     const expiredToken = createMockToken(-60);
     (CrudifyInstance as any).token = expiredToken;
-    (CrudifyInstance as any).refreshToken = "invalid-refresh-token";
+    (CrudifyInstance as any).refreshToken = 'invalid-refresh-token';
     (CrudifyInstance as any).tokenExpiresAt = Date.now() - 60000;
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
@@ -178,8 +178,8 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "ERROR",
-            data: JSON.stringify({ message: "Invalid refresh token" }),
+            status: 'ERROR',
+            data: JSON.stringify({ message: 'Invalid refresh token' }),
           },
         },
       }),
@@ -190,14 +190,14 @@ describe("E2E: Refresh Token Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
-            data: JSON.stringify({ _id: "123" }),
+            status: 'OK',
+            data: JSON.stringify({ _id: '123' }),
           },
         },
       }),
     });
 
-    const result = await CrudifyInstance.readItem("users", { _id: "123" });
+    const result = await CrudifyInstance.readItem('users', { _id: '123' });
 
     // Should fail with auth error
     expect(result.success).toBe(false);
@@ -205,29 +205,29 @@ describe("E2E: Refresh Token Flow", () => {
 
     // Tokens should be cleared
     expect(CrudifyInstance.isLogin()).toBe(false);
-    expect(CrudifyInstance.getTokenData().accessToken).toBe("");
-    expect(CrudifyInstance.getTokenData().refreshToken).toBe("");
+    expect(CrudifyInstance.getTokenData().accessToken).toBe('');
+    expect(CrudifyInstance.getTokenData().refreshToken).toBe('');
   });
 
-  it("should handle concurrent refresh requests", async () => {
+  it('should handle concurrent refresh requests', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Set expired token
     const expiredToken = createMockToken(-60);
     (CrudifyInstance as any).token = expiredToken;
-    (CrudifyInstance as any).refreshToken = "valid-refresh-token";
+    (CrudifyInstance as any).refreshToken = 'valid-refresh-token';
     (CrudifyInstance as any).tokenExpiresAt = Date.now() - 60000;
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
@@ -251,10 +251,10 @@ describe("E2E: Refresh Token Flow", () => {
         json: async () => ({
           data: {
             response: {
-              status: "OK",
+              status: 'OK',
               data: JSON.stringify({
                 token: newToken,
-                refreshToken: "new-refresh-token",
+                refreshToken: 'new-refresh-token',
                 expiresIn: 900,
               }),
             },
@@ -274,25 +274,25 @@ describe("E2E: Refresh Token Flow", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2); // init + refresh (only once)
   });
 
-  it("should not refresh if token is still valid", async () => {
+  it('should not refresh if token is still valid', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Set valid token (expires in 1 hour)
     const validToken = createMockToken(3600);
     (CrudifyInstance as any).token = validToken;
-    (CrudifyInstance as any).refreshToken = "refresh-token";
+    (CrudifyInstance as any).refreshToken = 'refresh-token';
     (CrudifyInstance as any).tokenExpiresAt = Date.now() + 3600000;
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
@@ -305,26 +305,26 @@ describe("E2E: Refresh Token Flow", () => {
     expect(fetchMock.mock.calls.length).toBe(fetchCountBefore); // No new calls
   });
 
-  it("should detect token expiring soon", async () => {
+  it('should detect token expiring soon', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Set token that expires in 3 minutes (within "normal" buffer of 5 min)
     const soonToExpireToken = createMockToken(180);
     (CrudifyInstance as any).token = soonToExpireToken;
     (CrudifyInstance as any).tokenExpiresAt = Date.now() + 180000;
-    (CrudifyInstance as any).refreshToken = "refresh-token";
+    (CrudifyInstance as any).refreshToken = 'refresh-token';
     (CrudifyInstance as any).refreshExpiresAt = Date.now() + 604800000;
 
     const tokenData = CrudifyInstance.getTokenData();
@@ -339,9 +339,9 @@ describe("E2E: Refresh Token Flow", () => {
 function createMockToken(expiresInSeconds: number): string {
   const futureTime = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const payload = {
-    sub: "user123",
+    sub: 'user123',
     exp: futureTime,
-    type: "access",
+    type: 'access',
     iat: Math.floor(Date.now() / 1000),
   };
   return `header.${btoa(JSON.stringify(payload))}.signature`;

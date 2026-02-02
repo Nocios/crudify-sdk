@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { CrudifyInstance } from "../../src/crudify";
-import { resetCrudifyState, createMockJWT } from "../helpers/testUtils";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { CrudifyInstance } from '../../src/crudify';
+import { resetCrudifyState, createMockJWT } from '../helpers/testUtils';
 
-describe("E2E: Authentication Flow", () => {
+describe('E2E: Authentication Flow', () => {
   let originalFetch: typeof globalThis.fetch;
   let fetchMock: any;
 
@@ -20,31 +20,31 @@ describe("E2E: Authentication Flow", () => {
     resetCrudifyState();
   });
 
-  it("should complete full authentication flow from init to logout", async () => {
+  it('should complete full authentication flow from init to logout', async () => {
     // Step 1: Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-endpoint-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-endpoint-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
-    expect((CrudifyInstance as any).endpoint).toBe("https://api.test.com/graphql");
+    await CrudifyInstance.init('public-api-key');
+    expect((CrudifyInstance as any).endpoint).toBe('https://api.test.com/graphql');
 
     // Step 2: Login
     const mockToken = createMockJWT({}, 3600); // Expires in 1 hour
-    const mockRefreshToken = "refresh-token-123";
+    const mockRefreshToken = 'refresh-token-123';
 
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: mockToken,
               refreshToken: mockRefreshToken,
@@ -56,7 +56,7 @@ describe("E2E: Authentication Flow", () => {
       }),
     });
 
-    const loginResult = await CrudifyInstance.login("user@example.com", "password123");
+    const loginResult = await CrudifyInstance.login('user@example.com', 'password123');
     expect(loginResult.success).toBe(true);
     expect(CrudifyInstance.isLogin()).toBe(true);
 
@@ -71,39 +71,39 @@ describe("E2E: Authentication Flow", () => {
     const logoutResult = await CrudifyInstance.logout();
     expect(logoutResult.success).toBe(true);
     expect(CrudifyInstance.isLogin()).toBe(false);
-    expect(CrudifyInstance.getTokenData().accessToken).toBe("");
+    expect(CrudifyInstance.getTokenData().accessToken).toBe('');
   });
 
-  it("should handle login failure and retry successfully", async () => {
+  it('should handle login failure and retry successfully', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // First login attempt fails
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "FIELD_ERROR",
-            data: JSON.stringify([{ path: ["password"], message: "Invalid password" }]),
+            status: 'FIELD_ERROR',
+            data: JSON.stringify([{ path: ['password'], message: 'Invalid password' }]),
           },
         },
       }),
     });
 
-    const failedLogin = await CrudifyInstance.login("user@example.com", "wrongpassword");
+    const failedLogin = await CrudifyInstance.login('user@example.com', 'wrongpassword');
     expect(failedLogin.success).toBe(false);
-    expect(failedLogin.errors?.password).toContain("Invalid password");
+    expect(failedLogin.errors?.password).toContain('Invalid password');
     expect(CrudifyInstance.isLogin()).toBe(false);
 
     // Second login attempt succeeds
@@ -113,10 +113,10 @@ describe("E2E: Authentication Flow", () => {
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: mockToken,
-              refreshToken: "refresh-token",
+              refreshToken: 'refresh-token',
               expiresIn: 900,
             }),
           },
@@ -124,29 +124,29 @@ describe("E2E: Authentication Flow", () => {
       }),
     });
 
-    const successLogin = await CrudifyInstance.login("user@example.com", "correctpassword");
+    const successLogin = await CrudifyInstance.login('user@example.com', 'correctpassword');
     expect(successLogin.success).toBe(true);
     expect(CrudifyInstance.isLogin()).toBe(true);
   });
 
-  it("should restore session from saved tokens", async () => {
+  it('should restore session from saved tokens', async () => {
     // Initialize
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     // Simulate restoring session from localStorage or similar
     const savedToken = createMockJWT({}, 3600);
-    const savedRefreshToken = "saved-refresh-token";
+    const savedRefreshToken = 'saved-refresh-token';
     const expiresAt = Date.now() + 900000; // 15 minutes
     const refreshExpiresAt = Date.now() + 604800000; // 7 days
 
@@ -166,7 +166,7 @@ describe("E2E: Authentication Flow", () => {
     expect(tokenData.isValid).toBe(true);
   });
 
-  it("should handle token invalidation callback", async () => {
+  it('should handle token invalidation callback', async () => {
     let callbackTriggered = false;
     const callback = vi.fn(() => {
       callbackTriggered = true;
@@ -179,24 +179,24 @@ describe("E2E: Authentication Flow", () => {
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.test.com/graphql",
-            apiKeyEndpoint: "test-key",
+            apiEndpoint: 'https://api.test.com/graphql',
+            apiKeyEndpoint: 'test-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("public-api-key");
+    await CrudifyInstance.init('public-api-key');
 
     const mockToken = createMockJWT({}, 3600);
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            status: "OK",
+            status: 'OK',
             data: JSON.stringify({
               token: mockToken,
-              refreshToken: "refresh-token",
+              refreshToken: 'refresh-token',
               expiresIn: 900,
             }),
           },
@@ -204,7 +204,7 @@ describe("E2E: Authentication Flow", () => {
       }),
     });
 
-    await CrudifyInstance.login("user@example.com", "password123");
+    await CrudifyInstance.login('user@example.com', 'password123');
 
     // Trigger token invalidation via logout
     await CrudifyInstance.logout();
@@ -213,40 +213,40 @@ describe("E2E: Authentication Flow", () => {
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
-  it("should re-initialize with different environment", async () => {
+  it('should re-initialize with different environment', async () => {
     // Initialize with dev environment
-    CrudifyInstance.config("dev");
+    CrudifyInstance.config('dev');
 
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.dev.crudify.io/graphql",
-            apiKeyEndpoint: "dev-key",
+            apiEndpoint: 'https://api.dev.crudify.io/graphql',
+            apiKeyEndpoint: 'dev-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("dev-api-key");
-    expect((CrudifyInstance as any).endpoint).toBe("https://api.dev.crudify.io/graphql");
+    await CrudifyInstance.init('dev-api-key');
+    expect((CrudifyInstance as any).endpoint).toBe('https://api.dev.crudify.io/graphql');
 
     // Re-initialize with production environment (need to reset first)
     resetCrudifyState();
-    CrudifyInstance.config("api");
+    CrudifyInstance.config('api');
 
     fetchMock.mockResolvedValueOnce({
       json: async () => ({
         data: {
           response: {
-            apiEndpoint: "https://api.api.crudify.io/graphql",
-            apiKeyEndpoint: "prod-key",
+            apiEndpoint: 'https://api.api.crudify.io/graphql',
+            apiKeyEndpoint: 'prod-key',
           },
         },
       }),
     });
 
-    await CrudifyInstance.init("prod-api-key");
-    expect((CrudifyInstance as any).endpoint).toBe("https://api.api.crudify.io/graphql");
+    await CrudifyInstance.init('prod-api-key');
+    expect((CrudifyInstance as any).endpoint).toBe('https://api.api.crudify.io/graphql');
   });
 });

@@ -38,20 +38,20 @@ Sin dependencias adicionales - completamente standalone.
 ## 🏗️ Configuración Rápida
 
 ```javascript
-import crudify from "@nocios/crudify-sdk";
+import crudify from '@nocios/crudify-sdk';
 
 // 1. Configurar ambiente
-crudify.config("dev"); // 'dev' | 'stg' | 'api' | 'prod'
+crudify.config('dev'); // 'dev' | 'stg' | 'api' | 'prod'
 
 // 2. Inicializar
-await crudify.init("tu_public_api_key_aqui");
+await crudify.init('tu_public_api_key_aqui');
 ```
 
 ### Variables de Entorno
 
 ```javascript
 const apiKey = process.env.REACT_APP_CRUDIFY_PUBLIC_API_KEY;
-const environment = process.env.REACT_APP_CRUDIFY_ENV || "dev";
+const environment = process.env.REACT_APP_CRUDIFY_ENV || 'dev';
 
 crudify.config(environment);
 await crudify.init(apiKey);
@@ -63,13 +63,13 @@ await crudify.init(apiKey);
 
 ```javascript
 // Login con email o username
-const result = await crudify.login("user@example.com", "password");
+const result = await crudify.login('user@example.com', 'password');
 
 if (result.success) {
-  console.log("Login exitoso:", result.data);
+  console.log('Login exitoso:', result.data);
   // Token automáticamente almacenado
 } else {
-  console.error("Error:", result.errors);
+  console.error('Error:', result.errors);
 }
 
 // Verificar estado
@@ -84,14 +84,14 @@ const refreshResult = await crudify.refreshAccessToken();
 
 // Configurar tokens manualmente (restaurar sesión)
 crudify.setTokens({
-  accessToken: "stored_access_token",
-  refreshToken: "stored_refresh_token",
+  accessToken: 'stored_access_token',
+  refreshToken: 'stored_refresh_token',
   expiresAt: 1640995200000,
 });
 
 // Obtener información de tokens
 const tokenData = crudify.getTokenData();
-console.log("Tokens:", tokenData);
+console.log('Tokens:', tokenData);
 ```
 
 ### Logout
@@ -106,16 +106,16 @@ await crudify.logout(); // Limpia todos los tokens
 
 ```javascript
 // Crear con autenticación de usuario
-const result = await crudify.createItem("products", {
-  name: "Nuevo Producto",
+const result = await crudify.createItem('products', {
+  name: 'Nuevo Producto',
   price: 99.99,
-  category: "electronics",
+  category: 'electronics',
 });
 
 // Crear público (solo con API key)
-const publicResult = await crudify.createItemPublic("contacts", {
-  name: "Juan Pérez",
-  email: "juan@example.com",
+const publicResult = await crudify.createItemPublic('contacts', {
+  name: 'Juan Pérez',
+  email: 'juan@example.com',
 });
 ```
 
@@ -123,14 +123,14 @@ const publicResult = await crudify.createItemPublic("contacts", {
 
 ```javascript
 // Leer un item específico
-const item = await crudify.readItem("products", {
-  _id: "60f7b1234567890123456789",
+const item = await crudify.readItem('products', {
+  _id: '60f7b1234567890123456789',
 });
 
 // Leer múltiples con filtros y paginación
-const items = await crudify.readItems("products", {
+const items = await crudify.readItems('products', {
   filter: {
-    category: "electronics",
+    category: 'electronics',
     price: { $gte: 50, $lte: 200 },
   },
   pagination: {
@@ -141,13 +141,13 @@ const items = await crudify.readItems("products", {
 });
 
 if (items.success) {
-  console.log("Productos:", items.data.items);
-  console.log("Total:", items.data.total);
+  console.log('Productos:', items.data.items);
+  console.log('Total:', items.data.total);
 }
 
 // ⚡ Obtener TODOS los resultados SIN paginación
-const allItems = await crudify.readItems("products", {
-  filter: { category: "electronics" },
+const allItems = await crudify.readItems('products', {
+  filter: { category: 'electronics' },
   pagination: {
     limit: 0, // ✅ limit: 0 retorna TODOS los resultados
   },
@@ -155,18 +155,18 @@ const allItems = await crudify.readItems("products", {
 });
 
 // Leer con referencias pobladas (populate)
-const orders = await crudify.readItems("orders", {
-  filter: { status: "pending" },
+const orders = await crudify.readItems('orders', {
+  filter: { status: 'pending' },
   populate: [
     {
-      path: "customerId", // Campo a poblar
-      moduleKey: "customers", // Módulo referenciado
-      select: ["name", "email"], // Campos a incluir
+      path: 'customerId', // Campo a poblar
+      moduleKey: 'customers', // Módulo referenciado
+      select: ['name', 'email'], // Campos a incluir
     },
     {
-      path: "productId",
-      moduleKey: "products",
-      select: "name price stock", // También acepta string
+      path: 'productId',
+      moduleKey: 'products',
+      select: 'name price stock', // También acepta string
     },
   ],
   pagination: { page: 1, limit: 10 },
@@ -176,8 +176,8 @@ const orders = await crudify.readItems("orders", {
 ### Update - Actualizar
 
 ```javascript
-const result = await crudify.updateItem("products", {
-  _id: "60f7b1234567890123456789",
+const result = await crudify.updateItem('products', {
+  _id: '60f7b1234567890123456789',
   price: 89.99,
   discount: 10,
 });
@@ -186,7 +186,7 @@ const result = await crudify.updateItem("products", {
 ### Delete - Eliminar
 
 ```javascript
-const result = await crudify.deleteItem("products", "60f7b1234567890123456789");
+const result = await crudify.deleteItem('products', '60f7b1234567890123456789');
 ```
 
 ## 🔄 Transacciones
@@ -197,20 +197,20 @@ Ejecuta múltiples operaciones de forma atómica:
 const transactionResult = await crudify.transaction({
   operations: [
     {
-      operation: "create",
-      moduleKey: "orders",
-      data: { userId: "user123", total: 199.98 },
+      operation: 'create',
+      moduleKey: 'orders',
+      data: { userId: 'user123', total: 199.98 },
     },
     {
-      operation: "update",
-      moduleKey: "products",
-      data: { _id: "product1", stock: { $inc: -2 } },
+      operation: 'update',
+      moduleKey: 'products',
+      data: { _id: 'product1', stock: { $inc: -2 } },
     },
   ],
 });
 
 if (transactionResult.success) {
-  console.log("Transacción exitosa:", transactionResult.data);
+  console.log('Transacción exitosa:', transactionResult.data);
 }
 ```
 
@@ -234,8 +234,8 @@ const publicStructure = await crudify.getStructurePublic();
 ```javascript
 // Generar URL firmada
 const signedUrl = await crudify.generateSignedUrl({
-  fileName: "image.jpg",
-  contentType: "image/jpeg",
+  fileName: 'image.jpg',
+  contentType: 'image/jpeg',
 });
 
 if (signedUrl.success) {
@@ -251,7 +251,7 @@ if (signedUrl.success) {
 ```javascript
 // Procesar todas las respuestas
 crudify.setResponseInterceptor((response) => {
-  console.log("Response:", response);
+  console.log('Response:', response);
 
   // Transformar o agregar datos
   response.metadata = { timestamp: Date.now() };
@@ -273,15 +273,15 @@ setTimeout(() => controller.abort(), 5000);
 
 try {
   const result = await crudify.readItems(
-    "products",
+    'products',
     {},
     {
       signal: controller.signal,
-    },
+    }
   );
 } catch (error) {
-  if (error.name === "AbortError") {
-    console.log("Request cancelado");
+  if (error.name === 'AbortError') {
+    console.log('Request cancelado');
   }
 }
 ```
@@ -291,25 +291,25 @@ try {
 Tipos completos incluidos:
 
 ```typescript
-import crudify, { CrudifyResponse, CrudifyTokenData, CrudifyEnvType, NociosError } from "@nocios/crudify-sdk";
+import crudify, { CrudifyResponse, CrudifyTokenData, CrudifyEnvType, NociosError } from '@nocios/crudify-sdk';
 
-const response: CrudifyResponse = await crudify.readItems("products", {});
+const response: CrudifyResponse = await crudify.readItems('products', {});
 const tokens: CrudifyTokenData = crudify.getTokenData();
 
 // Manejo de errores tipado
 if (!response.success && response.errorCode === NociosError.Unauthorized) {
-  console.log("No autorizado");
+  console.log('No autorizado');
 }
 ```
 
 ## 🛠️ Ejemplo Práctico
 
 ```javascript
-import crudify from "@nocios/crudify-sdk";
+import crudify from '@nocios/crudify-sdk';
 
 class ProductAPI {
   async init() {
-    crudify.config(process.env.REACT_APP_CRUDIFY_ENV || "prod");
+    crudify.config(process.env.REACT_APP_CRUDIFY_ENV || 'prod');
     await crudify.init(process.env.REACT_APP_CRUDIFY_PUBLIC_API_KEY);
   }
 
@@ -320,7 +320,7 @@ class ProductAPI {
   async getProducts(category = null, page = 1) {
     const filter = category ? { category } : {};
 
-    return await crudify.readItems("products", {
+    return await crudify.readItems('products', {
       filter,
       pagination: {
         page,
@@ -331,11 +331,11 @@ class ProductAPI {
   }
 
   async createProduct(productData) {
-    return await crudify.createItem("products", productData);
+    return await crudify.createItem('products', productData);
   }
 
   async updateStock(productId, newStock) {
-    return await crudify.updateItem("products", {
+    return await crudify.updateItem('products', {
       _id: productId,
       stock: newStock,
     });
@@ -346,10 +346,10 @@ class ProductAPI {
 const api = new ProductAPI();
 await api.init();
 
-const loginResult = await api.login("user@example.com", "password");
+const loginResult = await api.login('user@example.com', 'password');
 if (loginResult.success) {
-  const products = await api.getProducts("electronics");
-  console.log("Productos:", products.data);
+  const products = await api.getProducts('electronics');
+  console.log('Productos:', products.data);
 }
 ```
 
@@ -365,7 +365,7 @@ if (loginResult.success) {
 
 ```javascript
 // Configuración con logging
-await crudify.init("api_key", "debug"); // 'none' | 'debug'
+await crudify.init('api_key', 'debug'); // 'none' | 'debug'
 
 // Verificar nivel de logging
 console.log(crudify.getLogLevel());

@@ -105,7 +105,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Testing
 
 - **Unit Tests** (77 tests)
-
   - Token Validation (12 tests): JWT validation, expiration checks, token management
   - Response Formatting (21 tests): Error formatting, data sanitization, dangerous property detection
   - Configuration (10 tests): Environment configuration, logging levels, interceptors
@@ -279,19 +278,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Breaking changes are only introduced in major versions and include:
 
 1. **API Method Changes:**
-
    - Method signature modifications
    - Return value structure changes
    - Required parameter additions
 
 2. **Constructor Changes:**
-
    - Configuration object structure changes
    - Required option additions
    - Default behavior modifications
 
 3. **Error Handling Changes:**
-
    - Error object structure changes
    - Error code modifications
    - Exception type changes

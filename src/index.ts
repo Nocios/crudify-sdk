@@ -16,7 +16,7 @@ export type {
   ReadItemFilter,
   TransactionOperation,
   TransactionInput,
-} from "./types";
+} from './types';
 
-export { NociosError } from "./types";
-export { CrudifyInstance } from "./crudify";
+export { NociosError } from './types';
+export { CrudifyInstance } from './crudify';

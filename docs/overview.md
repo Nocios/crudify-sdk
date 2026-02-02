@@ -106,40 +106,40 @@ No additional dependencies required - the SDK is completely standalone.
 
 ```javascript
 // ES module import
-import { Crudify } from "@nocios/crudify-sdk";
+import { Crudify } from '@nocios/crudify-sdk';
 
 // Or default export
-import Crudify from "@nocios/crudify-sdk";
+import Crudify from '@nocios/crudify-sdk';
 ```
 
 ### CommonJS
 
 ```javascript
 // CommonJS require
-const { Crudify } = require("@nocios/crudify-sdk");
+const { Crudify } = require('@nocios/crudify-sdk');
 
 // Or default export
-const Crudify = require("@nocios/crudify-sdk").default;
+const Crudify = require('@nocios/crudify-sdk').default;
 ```
 
 ### Basic Setup
 
 ```javascript
-import { Crudify } from "@nocios/crudify-sdk";
+import { Crudify } from '@nocios/crudify-sdk';
 
 // Create instance
 const crudify = new Crudify({
-  environment: "dev", // 'dev', 'stg', 'prod'
-  logLevel: "error", // 'debug', 'error', 'silent'
+  environment: 'dev', // 'dev', 'stg', 'prod'
+  logLevel: 'error', // 'debug', 'error', 'silent'
 });
 
 // Initialize with API key
 async function initialize() {
   try {
-    await crudify.init("your-public-api-key");
-    console.log("Crudify SDK initialized successfully");
+    await crudify.init('your-public-api-key');
+    console.log('Crudify SDK initialized successfully');
   } catch (error) {
-    console.error("Failed to initialize:", error);
+    console.error('Failed to initialize:', error);
   }
 }
 
@@ -154,14 +154,14 @@ initialize();
 // Basic login
 try {
   const result = await crudify.login({
-    email: "user@example.com",
-    password: "securePassword123",
+    email: 'user@example.com',
+    password: 'securePassword123',
   });
 
-  console.log("Login successful:", result);
+  console.log('Login successful:', result);
   // Result contains: { user, accessToken, refreshToken, expiresIn }
 } catch (error) {
-  console.error("Login failed:", error);
+  console.error('Login failed:', error);
 }
 ```
 
@@ -171,14 +171,14 @@ try {
 // Login with additional options
 const result = await crudify.login(
   {
-    email: "user@example.com",
-    password: "securePassword123",
+    email: 'user@example.com',
+    password: 'securePassword123',
   },
   {
     rememberMe: true, // Extended session duration
-    deviceName: "My Device", // Device identification
+    deviceName: 'My Device', // Device identification
     signal: abortController.signal, // Request cancellation
-  },
+  }
 );
 ```
 
@@ -187,20 +187,20 @@ const result = await crudify.login(
 ```javascript
 // Set tokens manually (e.g., from stored values)
 crudify.setTokens({
-  accessToken: "your-access-token",
-  refreshToken: "your-refresh-token",
+  accessToken: 'your-access-token',
+  refreshToken: 'your-refresh-token',
 });
 
 // Get current tokens
 const tokens = crudify.getTokens();
-console.log("Current tokens:", tokens);
+console.log('Current tokens:', tokens);
 
 // Refresh access token manually
 try {
   await crudify.refreshAccessToken();
-  console.log("Token refreshed successfully");
+  console.log('Token refreshed successfully');
 } catch (error) {
-  console.error("Token refresh failed:", error);
+  console.error('Token refresh failed:', error);
 }
 
 // Logout and clear tokens
@@ -214,7 +214,7 @@ await crudify.logout();
 // You can configure the refresh behavior:
 
 const crudify = new Crudify({
-  environment: "dev",
+  environment: 'dev',
   autoRefresh: true, // Enable automatic refresh (default: true)
   refreshThreshold: 300, // Refresh 5 minutes before expiration (default: 300)
 });
@@ -227,19 +227,19 @@ const crudify = new Crudify({
 ```javascript
 // Create single item
 try {
-  const newUser = await crudify.createItem("users", {
-    name: "John Doe",
-    email: "john@example.com",
-    role: "editor",
+  const newUser = await crudify.createItem('users', {
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'editor',
   });
 
-  console.log("User created:", newUser);
+  console.log('User created:', newUser);
 } catch (error) {
-  console.error("Failed to create user:", error);
+  console.error('Failed to create user:', error);
 }
 
 // Create with request options
-const newUser = await crudify.createItem("users", userData, {
+const newUser = await crudify.createItem('users', userData, {
   signal: abortController.signal, // Cancellation support
 });
 ```
@@ -248,16 +248,16 @@ const newUser = await crudify.createItem("users", userData, {
 
 ```javascript
 // Read single item by ID
-const user = await crudify.readItem("users", "user-id-123");
+const user = await crudify.readItem('users', 'user-id-123');
 
 // Read multiple items with filtering and pagination
-const users = await crudify.readItems("users", {
+const users = await crudify.readItems('users', {
   filter: {
     // ✅ Usar "filter" (singular)
-    role: "editor",
+    role: 'editor',
     isActive: true,
     createdAt: {
-      $gte: "2024-01-01T00:00:00Z",
+      $gte: '2024-01-01T00:00:00Z',
     },
   },
   pagination: {
@@ -270,11 +270,11 @@ const users = await crudify.readItems("users", {
   },
 });
 
-console.log("Users found:", users.data.items);
-console.log("Total count:", users.data.total);
+console.log('Users found:', users.data.items);
+console.log('Total count:', users.data.total);
 
 // ⚡ Get ALL results without pagination
-const allUsers = await crudify.readItems("users", {
+const allUsers = await crudify.readItems('users', {
   filter: { isActive: true },
   pagination: {
     limit: 0, // ✅ limit: 0 returns ALL results (no pagination)
@@ -282,21 +282,21 @@ const allUsers = await crudify.readItems("users", {
   sort: { name: 1 },
 });
 
-console.log("All users:", allUsers.data.items.length);
+console.log('All users:', allUsers.data.items.length);
 
 // Read with populated references
-const orders = await crudify.readItems("orders", {
-  filter: { status: "pending" },
+const orders = await crudify.readItems('orders', {
+  filter: { status: 'pending' },
   populate: [
     {
-      path: "customerId", // Field to populate
-      moduleKey: "customers", // Referenced module
-      select: ["name", "email"], // Fields to include (array or string)
+      path: 'customerId', // Field to populate
+      moduleKey: 'customers', // Referenced module
+      select: ['name', 'email'], // Fields to include (array or string)
     },
     {
-      path: "productIds", // Works with arrays too
-      moduleKey: "products",
-      select: "name price stock", // String with space-separated fields
+      path: 'productIds', // Works with arrays too
+      moduleKey: 'products',
+      select: 'name price stock', // String with space-separated fields
     },
   ],
   pagination: { page: 1, limit: 10 },
@@ -305,10 +305,10 @@ const orders = await crudify.readItems("orders", {
 
 // Access populated data
 orders.data.items.forEach((order) => {
-  console.log("Customer:", order.customerId?.name);
+  console.log('Customer:', order.customerId?.name);
   console.log(
-    "Products:",
-    order.productIds?.map((p) => p.name),
+    'Products:',
+    order.productIds?.map((p) => p.name)
   );
 });
 ```
@@ -317,27 +317,27 @@ orders.data.items.forEach((order) => {
 
 ```javascript
 // Complex filtering with MongoDB-style operators
-const users = await crudify.readItems("users", {
+const users = await crudify.readItems('users', {
   filter: {
     // ✅ Use "filter" (singular)
     // Text search
-    name: { $regex: "John", $options: "i" },
+    name: { $regex: 'John', $options: 'i' },
 
     // Numeric comparisons
     age: { $gte: 18, $lte: 65 },
 
     // Array operations
-    roles: { $in: ["admin", "editor"] },
-    permissions: { $all: ["read", "write"] },
+    roles: { $in: ['admin', 'editor'] },
+    permissions: { $all: ['read', 'write'] },
 
     // Date operations
     createdAt: {
-      $gte: new Date("2024-01-01"),
-      $lt: new Date("2024-12-31"),
+      $gte: new Date('2024-01-01'),
+      $lt: new Date('2024-12-31'),
     },
 
     // Logical operators
-    $or: [{ status: "active" }, { lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }],
+    $or: [{ status: 'active' }, { lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }],
   },
   pagination: {
     page: 1,
@@ -350,21 +350,21 @@ const users = await crudify.readItems("users", {
 
 ```javascript
 // Update single item
-const updatedUser = await crudify.updateItem("users", "user-id-123", {
-  name: "John Smith",
+const updatedUser = await crudify.updateItem('users', 'user-id-123', {
+  name: 'John Smith',
   lastModified: new Date().toISOString(),
 });
 
 // Partial updates with MongoDB operators
-const result = await crudify.updateItem("users", "user-id-123", {
+const result = await crudify.updateItem('users', 'user-id-123', {
   $set: {
-    name: "New Name",
+    name: 'New Name',
     updatedAt: new Date().toISOString(),
   },
   $push: {
     loginHistory: {
       timestamp: new Date(),
-      ip: "192.168.1.1",
+      ip: '192.168.1.1',
     },
   },
   $inc: {
@@ -377,10 +377,10 @@ const result = await crudify.updateItem("users", "user-id-123", {
 
 ```javascript
 // Delete single item
-await crudify.deleteItem("users", "user-id-123");
+await crudify.deleteItem('users', 'user-id-123');
 
 // Soft delete (if supported by your schema)
-await crudify.updateItem("users", "user-id-123", {
+await crudify.updateItem('users', 'user-id-123', {
   isDeleted: true,
   deletedAt: new Date().toISOString(),
 });
@@ -392,18 +392,18 @@ Some operations don't require authentication and can be performed with just an A
 
 ```javascript
 // Get collection structure (public)
-const structure = await crudify.getStructurePublic("users");
-console.log("Collection schema:", structure);
+const structure = await crudify.getStructurePublic('users');
+console.log('Collection schema:', structure);
 
 // Create public item (if allowed by collection settings)
-const publicItem = await crudify.createItemPublic("feedback", {
-  message: "Great product!",
+const publicItem = await crudify.createItemPublic('feedback', {
+  message: 'Great product!',
   rating: 5,
   timestamp: new Date().toISOString(),
 });
 
 // Read public items
-const publicPosts = await crudify.readItemsPublic("blog-posts", {
+const publicPosts = await crudify.readItemsPublic('blog-posts', {
   filter: { published: true }, // ✅ Use "filter" (singular)
   pagination: { page: 1, limit: 10 },
 });
@@ -417,26 +417,26 @@ Execute multiple operations atomically:
 // Define transaction operations
 const operations = [
   {
-    type: "create",
-    collection: "orders",
+    type: 'create',
+    collection: 'orders',
     data: {
-      customerId: "customer-123",
+      customerId: 'customer-123',
       total: 99.99,
-      items: [{ productId: "prod-1", quantity: 2, price: 49.99 }],
+      items: [{ productId: 'prod-1', quantity: 2, price: 49.99 }],
     },
   },
   {
-    type: "update",
-    collection: "inventory",
-    id: "prod-1",
+    type: 'update',
+    collection: 'inventory',
+    id: 'prod-1',
     data: {
       $inc: { quantity: -2 },
     },
   },
   {
-    type: "update",
-    collection: "customers",
-    id: "customer-123",
+    type: 'update',
+    collection: 'customers',
+    id: 'customer-123',
     data: {
       $inc: { totalOrders: 1 },
       $set: { lastOrderDate: new Date().toISOString() },
@@ -447,9 +447,9 @@ const operations = [
 // Execute transaction
 try {
   const results = await crudify.transaction(operations);
-  console.log("Transaction completed:", results);
+  console.log('Transaction completed:', results);
 } catch (error) {
-  console.error("Transaction failed:", error);
+  console.error('Transaction failed:', error);
   // All operations are rolled back automatically
 }
 ```
@@ -461,27 +461,27 @@ try {
 ```javascript
 // Generate upload URL
 const uploadUrl = await crudify.generateSignedUrl(
-  "uploads/user-avatar.jpg", // File key
-  "upload", // Operation: 'upload' or 'download'
-  3600, // Expires in 1 hour (optional)
+  'uploads/user-avatar.jpg', // File key
+  'upload', // Operation: 'upload' or 'download'
+  3600 // Expires in 1 hour (optional)
 );
 
 // Upload file to S3
-const file = document.getElementById("fileInput").files[0];
+const file = document.getElementById('fileInput').files[0];
 const response = await fetch(uploadUrl, {
-  method: "PUT",
+  method: 'PUT',
   body: file,
   headers: {
-    "Content-Type": file.type,
+    'Content-Type': file.type,
   },
 });
 
 if (response.ok) {
-  console.log("File uploaded successfully");
+  console.log('File uploaded successfully');
 
   // Save file reference in your data
-  await crudify.updateItem("users", userId, {
-    avatar: "uploads/user-avatar.jpg",
+  await crudify.updateItem('users', userId, {
+    avatar: 'uploads/user-avatar.jpg',
   });
 }
 ```
@@ -491,15 +491,15 @@ if (response.ok) {
 ```javascript
 // Generate download URL
 const downloadUrl = await crudify.generateSignedUrl(
-  "uploads/user-avatar.jpg",
-  "download",
-  300, // 5 minutes expiration
+  'uploads/user-avatar.jpg',
+  'download',
+  300 // 5 minutes expiration
 );
 
 // Create download link
-const link = document.createElement("a");
+const link = document.createElement('a');
 link.href = downloadUrl;
-link.download = "avatar.jpg";
+link.download = 'avatar.jpg';
 link.click();
 ```
 
@@ -511,36 +511,36 @@ The SDK provides detailed error information:
 
 ```javascript
 try {
-  await crudify.createItem("users", invalidData);
+  await crudify.createItem('users', invalidData);
 } catch (error) {
-  console.log("Error type:", error.name); // 'CrudifyError'
-  console.log("Error message:", error.message); // Human-readable message
-  console.log("Error code:", error.code); // Error code
-  console.log("Status code:", error.statusCode); // HTTP status code
-  console.log("Field errors:", error.fieldErrors); // Validation errors
+  console.log('Error type:', error.name); // 'CrudifyError'
+  console.log('Error message:', error.message); // Human-readable message
+  console.log('Error code:', error.code); // Error code
+  console.log('Status code:', error.statusCode); // HTTP status code
+  console.log('Field errors:', error.fieldErrors); // Validation errors
 
   // Handle specific error types
   switch (error.code) {
-    case "VALIDATION_ERROR":
+    case 'VALIDATION_ERROR':
       // Handle validation errors
       error.fieldErrors?.forEach((fieldError) => {
         console.log(`${fieldError.field}: ${fieldError.message}`);
       });
       break;
 
-    case "UNAUTHORIZED":
+    case 'UNAUTHORIZED':
       // Handle authentication errors
-      console.log("Please log in again");
+      console.log('Please log in again');
       break;
 
-    case "NETWORK_ERROR":
+    case 'NETWORK_ERROR':
       // Handle network errors
-      console.log("Check your internet connection");
+      console.log('Check your internet connection');
       break;
 
     default:
       // Handle other errors
-      console.log("An unexpected error occurred");
+      console.log('An unexpected error occurred');
   }
 }
 ```
@@ -550,14 +550,14 @@ try {
 ```javascript
 // Set global error handler
 crudify.setErrorHandler((error, context) => {
-  console.error("Global error handler:", error);
-  console.log("Error context:", context);
+  console.error('Global error handler:', error);
+  console.log('Error context:', context);
 
   // Log to external service
   errorLogger.log(error, context);
 
   // Show user-friendly message
-  showNotification("An error occurred. Please try again.");
+  showNotification('An error occurred. Please try again.');
 });
 ```
 
@@ -568,8 +568,8 @@ crudify.setErrorHandler((error, context) => {
 ```javascript
 // Environment-specific configuration
 const crudify = new Crudify({
-  environment: "prod", // 'dev', 'stg', 'prod'
-  logLevel: "error", // 'debug', 'error', 'silent'
+  environment: 'prod', // 'dev', 'stg', 'prod'
+  logLevel: 'error', // 'debug', 'error', 'silent'
   timeout: 30000, // Request timeout in milliseconds
   retryAttempts: 3, // Number of retry attempts for failed requests
   retryDelay: 1000, // Delay between retry attempts
@@ -581,13 +581,13 @@ const crudify = new Crudify({
 ```javascript
 // Override default endpoints
 const crudify = new Crudify({
-  environment: "custom",
+  environment: 'custom',
   endpoints: {
-    api: "https://your-custom-api.com/graphql",
-    metadata: "https://your-custom-metadata.com",
+    api: 'https://your-custom-api.com/graphql',
+    metadata: 'https://your-custom-metadata.com',
   },
   headers: {
-    "Custom-Header": "custom-value",
+    'Custom-Header': 'custom-value',
   },
 });
 ```
@@ -598,14 +598,14 @@ const crudify = new Crudify({
 // Add request interceptor
 crudify.addRequestInterceptor((config) => {
   // Modify request config
-  config.headers["X-Custom-Header"] = "value";
+  config.headers['X-Custom-Header'] = 'value';
   return config;
 });
 
 // Add response interceptor
 crudify.addResponseInterceptor((response) => {
   // Process response
-  console.log("API response:", response);
+  console.log('API response:', response);
   return response;
 });
 ```
@@ -620,11 +620,11 @@ crudify.addResponseInterceptor((response) => {
 
 // Configure storage options
 const crudify = new Crudify({
-  environment: "prod",
+  environment: 'prod',
   storage: {
-    type: "sessionStorage", // 'localStorage' or 'sessionStorage'
+    type: 'sessionStorage', // 'localStorage' or 'sessionStorage'
     encrypt: true, // Encrypt stored tokens (default: true)
-    prefix: "myapp_", // Storage key prefix
+    prefix: 'myapp_', // Storage key prefix
   },
 });
 ```
@@ -637,7 +637,7 @@ const crudify = new Crudify({
 
 // Custom security configuration
 const crudify = new Crudify({
-  environment: "prod",
+  environment: 'prod',
   security: {
     csrfProtection: true, // Enable CSRF protection
     validateSSL: true, // Validate SSL certificates
@@ -651,14 +651,14 @@ const crudify = new Crudify({
 ### Complete Type Safety
 
 ```typescript
-import { Crudify, CrudifyResponse, CrudifyError } from "@nocios/crudify-sdk";
+import { Crudify, CrudifyResponse, CrudifyError } from '@nocios/crudify-sdk';
 
 // Define your data interfaces
 interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "editor" | "viewer";
+  role: 'admin' | 'editor' | 'viewer';
   createdAt: string;
   updatedAt: string;
 }
@@ -666,27 +666,27 @@ interface User {
 interface CreateUserData {
   name: string;
   email: string;
-  role: "admin" | "editor" | "viewer";
+  role: 'admin' | 'editor' | 'viewer';
 }
 
 // Type-safe CRUD operations
-const crudify = new Crudify({ environment: "dev" });
+const crudify = new Crudify({ environment: 'dev' });
 
 // Create with type safety
-const newUser: CrudifyResponse<User> = await crudify.createItem<User, CreateUserData>("users", {
-  name: "John Doe",
-  email: "john@example.com",
-  role: "editor",
+const newUser: CrudifyResponse<User> = await crudify.createItem<User, CreateUserData>('users', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  role: 'editor',
 });
 
 // Read with type safety
-const users: CrudifyResponse<User[]> = await crudify.readItems<User>("users");
+const users: CrudifyResponse<User[]> = await crudify.readItems<User>('users');
 
 // Type-safe error handling
 try {
-  await crudify.createItem("users", userData);
+  await crudify.createItem('users', userData);
 } catch (error: CrudifyError) {
-  if (error.code === "VALIDATION_ERROR") {
+  if (error.code === 'VALIDATION_ERROR') {
     error.fieldErrors?.forEach((fieldError) => {
       console.log(`${fieldError.field}: ${fieldError.message}`);
     });
@@ -698,7 +698,7 @@ try {
 
 ```typescript
 // Extend SDK types for your specific use case
-declare module "@nocios/crudify-sdk" {
+declare module '@nocios/crudify-sdk' {
   interface CrudifyConfig {
     customOption?: string;
   }
@@ -710,8 +710,8 @@ declare module "@nocios/crudify-sdk" {
 
 // Now these fields are recognized by TypeScript
 const crudify = new Crudify({
-  environment: "dev",
-  customOption: "custom-value",
+  environment: 'dev',
+  customOption: 'custom-value',
 });
 ```
 
@@ -722,7 +722,7 @@ const crudify = new Crudify({
 ```javascript
 // Enable request caching
 const crudify = new Crudify({
-  environment: "prod",
+  environment: 'prod',
   cache: {
     enabled: true,
     ttl: 300000, // Cache TTL in milliseconds (5 minutes)
@@ -731,8 +731,8 @@ const crudify = new Crudify({
 });
 
 // Cached requests
-const users = await crudify.readItems("users"); // Fetches from API
-const cachedUsers = await crudify.readItems("users"); // Returns from cache
+const users = await crudify.readItems('users'); // Fetches from API
+const cachedUsers = await crudify.readItems('users'); // Returns from cache
 ```
 
 ### Request Deduplication
@@ -742,9 +742,9 @@ const cachedUsers = await crudify.readItems("users"); // Returns from cache
 // Multiple identical requests made simultaneously will be deduplicated
 
 // These three requests will be merged into one
-const promise1 = crudify.readItems("users");
-const promise2 = crudify.readItems("users");
-const promise3 = crudify.readItems("users");
+const promise1 = crudify.readItems('users');
+const promise2 = crudify.readItems('users');
+const promise3 = crudify.readItems('users');
 
 const [result1, result2, result3] = await Promise.all([promise1, promise2, promise3]);
 // All three results are identical and come from a single API call
@@ -755,9 +755,9 @@ const [result1, result2, result3] = await Promise.all([promise1, promise2, promi
 ```javascript
 // Batch multiple operations for better performance
 const batchOperations = [
-  { type: "read", collection: "users", id: "user-1" },
-  { type: "read", collection: "users", id: "user-2" },
-  { type: "update", collection: "posts", id: "post-1", data: { views: 100 } },
+  { type: 'read', collection: 'users', id: 'user-1' },
+  { type: 'read', collection: 'users', id: 'user-2' },
+  { type: 'update', collection: 'posts', id: 'post-1', data: { views: 100 } },
 ];
 
 const results = await crudify.batch(batchOperations);
@@ -773,12 +773,12 @@ const results = await crudify.batch(batchOperations);
 
    ```javascript
    // Old (v3.x)
-   const crudify = new Crudify("dev", "debug");
+   const crudify = new Crudify('dev', 'debug');
 
    // New (v4.x)
    const crudify = new Crudify({
-     environment: "dev",
-     logLevel: "debug",
+     environment: 'dev',
+     logLevel: 'debug',
    });
    ```
 
@@ -800,11 +800,11 @@ const results = await crudify.batch(batchOperations);
 
    ```javascript
    // Old (v3.x)
-   const response = await crudify.readItems("users");
+   const response = await crudify.readItems('users');
    const users = response.data.items;
 
    // New (v4.x)
-   const response = await crudify.readItems("users");
+   const response = await crudify.readItems('users');
    const users = response.data; // Direct access to data
    ```
 
@@ -821,8 +821,8 @@ const results = await crudify.batch(batchOperations);
    ```javascript
    // Update all constructor calls to use object parameter
    const crudify = new Crudify({
-     environment: process.env.NODE_ENV === "production" ? "prod" : "dev",
-     logLevel: "error",
+     environment: process.env.NODE_ENV === 'production' ? 'prod' : 'dev',
+     logLevel: 'error',
    });
    ```
 
@@ -845,8 +845,8 @@ const results = await crudify.batch(batchOperations);
 
 ```typescript
 interface CrudifyConfig {
-  environment: "dev" | "stg" | "prod" | "custom";
-  logLevel?: "debug" | "error" | "silent";
+  environment: 'dev' | 'stg' | 'prod' | 'custom';
+  logLevel?: 'debug' | 'error' | 'silent';
   timeout?: number;
   retryAttempts?: number;
   retryDelay?: number;
@@ -858,7 +858,7 @@ interface CrudifyConfig {
   };
   headers?: Record<string, string>;
   storage?: {
-    type?: "localStorage" | "sessionStorage";
+    type?: 'localStorage' | 'sessionStorage';
     encrypt?: boolean;
     prefix?: string;
   };

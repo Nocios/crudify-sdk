@@ -5,17 +5,21 @@
 
 echo "Running pre-commit checks (fast)..."
 
-# 0. Auto-increment version
-echo "\n[0/3] Bumping version..."
+# 0. Format staged files with Prettier
+echo "\n[0/4] Formatting staged files..."
+pnpm exec lint-staged || exit 1
+
+# 1. Auto-increment version
+echo "\n[1/4] Bumping version..."
 node scripts/bump-version.cjs || exit 1
 git add package.json
 
-# 1. TypeCheck (mas rapido, detecta errores de tipos)
-echo "\n[1/3] Type checking..."
+# 2. TypeCheck (mas rapido, detecta errores de tipos)
+echo "\n[2/4] Type checking..."
 pnpm run typecheck || exit 1
 
-# 2. Lint (rapido, detecta problemas de codigo)
-echo "\n[2/3] Linting..."
+# 3. Lint (rapido, detecta problemas de codigo)
+echo "\n[3/4] Linting..."
 pnpm run lint || exit 1
 
 echo "\n✅ Pre-commit checks passed!"
