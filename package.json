@@ -1,6 +1,7 @@
 {
   "name": "@nocios/crudify-sdk",
-  "version": "1.0.6",
+  "version": "1.0.7",
+  "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": ">=24.12.0"
   },
@@ -20,8 +21,8 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "prebuild": "npm run clean",
-    "prepublishOnly": "npm run build",
+    "prebuild": "pnpm run clean",
+    "prepublishOnly": "pnpm run build",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
@@ -29,9 +30,9 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run typecheck && npm run lint && npm run test",
-    "ci": "npm run validate",
-    "sonar": "npm test && npx sonarqube-scanner -Dsonar.host.url=http://localhost:9000",
+    "validate": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "ci": "pnpm run validate",
+    "sonar": "pnpm test && npx sonarqube-scanner -Dsonar.host.url=http://localhost:9000",
     "prepare": "husky"
   },
   "repository": {

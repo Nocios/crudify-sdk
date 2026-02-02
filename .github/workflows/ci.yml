@@ -1,0 +1,68 @@
+name: Test & Quality Check
+
+on:
+  push:
+    branches: [main, stg, prod]
+  pull_request:
+    branches: [main, stg, prod]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Use Node.js 24.12.0
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: "24.12.0"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.0.0
+        with:
+          version: 10.28.2
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4.2.0
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm run lint --if-present
+        continue-on-error: true
+
+      - name: Run type check
+        run: pnpm run typecheck --if-present
+        continue-on-error: true
+
+      - name: Run tests with coverage
+        run: pnpm run test:coverage -- --run
+
+      - name: Upload coverage to Codecov
+        if: success()
+        uses: codecov/codecov-action@v5.1.2
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Check bundle size
+        run: pnpm run build:analyze --if-present
+        continue-on-error: true
